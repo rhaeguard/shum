@@ -1,0 +1,8 @@
+def fact = end
+
+def ifTrue = scope 1 * end
+def ifFalse = scope dup 1 - fact * end
+
+def fact = dup 1 <= ifTrue ifFalse ifelse end
+
+5 fact show
