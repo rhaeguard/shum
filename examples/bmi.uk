@@ -1,0 +1,18 @@
+# bmi is weight/height^2
+# so, this function assumes that the elements are inserted as
+# [..., weight, height] into the stack
+# so, we first raise height to its second power
+# for that, we use 'pow' function which takes two args [num, power]
+# we push 2 into the stack [..., weight, height, 2]
+# run 'pow':  [..., weight, height^2]
+# perform divide and done!
+impl bmi = 2 pow / .
+
+# some variables
+def height = 1.65
+def weight = 67.5
+
+# and now we pass the arguments to the bmi function
+# once we're done we show the result which will be 
+# the topmost element of the stack
+weight height bmi show

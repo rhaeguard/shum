@@ -1,0 +1,15 @@
+# since fibonacci is a recursive function, it needs to refer to itself somehow
+# here we define that there will be a function called fib, but at this point it is abstract
+def fib
+
+#   given F(n) = F(n - 1) + F(n - 2) 
+#   the basic idea is that we have to find F(n-2) and we recurse till we reach a base case
+#   then swap the answer of F(n-2) with (n-1) in the stack, and recurse till we reach a base case
+#   then sum the results
+
+impl fib = dup 1 <= { dup 0 <= { drop 0 } { drop 1 } ifelse } { 1 - dup 1 - fib swap fib + } ifelse . 
+
+# prints fibonacci of numbers till 5
+impl loop = dup 5 <= { dup fib show drop 1 + loop } { drop } ifelse .
+
+0 loop .

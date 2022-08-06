@@ -1,4 +1,6 @@
 import sys
+from random import randint
+import shlex
 
 def is_float(n):
     try:
@@ -7,10 +9,26 @@ def is_float(n):
     except ValueError:
         return False
 
+def castIfAvailable(val):
+    try:
+        if val.isnumeric():
+            val = int(val)
+        elif is_float(val):
+            val = float(val)
+        elif val.startswith("\"") and val.endswith("\""):
+            val = val[1:-1]
+        return val
+    except:
+        return val
+
 def binaryArith(stack, op):
     b = stack.pop()
     a = stack.pop()
-    stack.append(op(a, b))
+    try:
+        stack.append(op(a, b))
+    except:
+        print(f"Arguments were: a={a} b = {b}")
+        raise
 
 arithmetic_ops = {
     "+": lambda a, b: a + b,
@@ -20,41 +38,79 @@ arithmetic_ops = {
     "/": lambda a, b: a / b,
     "pow": lambda a, b: a ** b,
     "<": lambda a, b: a < b,
-    "<=": lambda a, b: a <= b
+    "<=": lambda a, b: a <= b,
+    ">": lambda a, b: a > b,
+    ">=": lambda a, b: a >= b,
+    "==": lambda a, b: a == b
 }
 
 lib = {
     # name => (instructions, isScoped)
-    "*": ([], False),
     "dup": ([], False),
     "show": ([], False),
-    "ifelse": ([], False)
+    "ifelse": ([], False),
+    "swap": ([], False),
+    "drop": ([], False)
 }
 
-def handleFunctionCreation(instructions, stack):
+def handleScope(instructions):
+    funcIns = []
+    isScoped = True
+    if instructions[0] != "{":
+        v = castIfAvailable(instructions.pop(0))
+        return ([v], False)
+
+    while True:
+        ins = instructions.pop(0)
+        if ins == "{":
+            if funcIns == []:
+                isScoped = True
+            else:
+                instructions.insert(0, "{")
+                scopeName = f"anon#{randint(0, 15000)}"
+                lib[scopeName] = handleScope(instructions)
+                funcIns.append(scopeName)
+            continue
+        
+        if ins not in ["}"]:
+            funcIns.append(castIfAvailable(ins))
+        else:
+            break
+    return (funcIns, isScoped)
+
+def handleDef(instructions):
+    name = instructions.pop(0)
+    v = instructions[0]
+    funcIns, isScoped = [], False
+    if v == "=":
+        instructions.pop(0)
+        funcIns, isScoped = handleScope(instructions)
+    lib[name] = (funcIns, isScoped)
+
+def handleImpl(instructions):
     name = instructions.pop(0)
     v = instructions.pop(0)
     if v != "=":
-        raise Exception(f"Should be '=', but was '{v}'")
+        raise Exception("Should have '='")
 
     funcIns = []
-    isScoped = False
     while True:
-        ins = instructions.pop(0)
-        if ins == "scope" and funcIns == []:
-            isScoped = True
-            continue
-        
-        if ins not in ["end"]:
-            funcIns.append(ins)
+        ins = instructions[0]
+        if ins == "{":
+            scopeName = f"{name}#{randint(0, 15000)}"
+            lib[scopeName] = handleScope(instructions)
+            funcIns.append(scopeName)
+        elif ins not in ["."]:
+            instructions.pop(0)
+            funcIns.append(castIfAvailable(ins))
         else:
+            instructions.pop(0)
             break
-    lib[name] = (funcIns, isScoped)
+    lib[name] = (funcIns, False)
 
 def exec(instructions, stack):
     while instructions:
         e = instructions.pop(0)
-        print(stack, f'Exec: {e}')
         if e in arithmetic_ops:
             binaryArith(stack, arithmetic_ops[e])
         elif e in lib:
@@ -62,6 +118,10 @@ def exec(instructions, stack):
                 print(stack[-1])
             elif e == "dup":
                 stack.append(stack[-1])
+            elif e == "swap":
+                stack[-1], stack[-2] = stack[-2], stack[-1]
+            elif e == "drop":
+                stack.pop()
             elif e == "ifelse":
                 elseClause = stack.pop()
                 ifClause = stack.pop()
@@ -77,14 +137,16 @@ def exec(instructions, stack):
                 else:
                     stack.append(e)
         elif e == "def":
-            handleFunctionCreation(instructions, stack)
+            handleDef(instructions)
+        elif e == "impl":
+            handleImpl(instructions)
+        elif e == ".":
+            if stack:
+                print(stack[-1])
+            exit(0)
         else:
-            if e.isnumeric():
-                e = int(e)
-            elif is_float(e):
-                e = float(e)
+            e = castIfAvailable(e)
             stack.append(e)
-
 
 if __name__ == "__main__":
     instructions = []
@@ -93,7 +155,7 @@ if __name__ == "__main__":
     with open(filename) as file:
         for line in file:
             if not line.startswith("#"):
-                instructions.extend(line.split())
+                instructions.extend(shlex.split(line))
 
     stack = []
 
