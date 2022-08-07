@@ -1,6 +1,7 @@
 import sys
 from random import randint
 import shlex
+import std
 
 def is_float(n):
     try:
@@ -17,6 +18,12 @@ def castIfAvailable(val):
             val = float(val)
         elif val.startswith("\"") and val.endswith("\""):
             val = val[1:-1]
+        elif val.startswith("[") and val.endswith("]") and ":" in val:
+            val = val[1:-1]
+            start, end = val.split(":")
+            start = int(start)
+            end = int(end)            
+            return list(range(start, end + 1))
         return val
     except:
         return val
@@ -44,14 +51,28 @@ arithmetic_ops = {
     "==": lambda a, b: a == b
 }
 
+EMPTY_BODY = ([], False)
+
 lib = {
     # name => (instructions, isScoped)
-    "dup": ([], False),
-    "show": ([], False),
-    "ifelse": ([], False),
-    "swap": ([], False),
-    "drop": ([], False)
+    "dup": EMPTY_BODY,
+    "show": EMPTY_BODY,
+    "ifelse": EMPTY_BODY,
+    "swap": EMPTY_BODY,
+    "drop": EMPTY_BODY,
+    "save": EMPTY_BODY
 }
+
+# name => value
+globalVariables = dict()
+
+def handleVar(instructions):
+    name = instructions.pop(0)
+    v = None
+    if instructions[0] == "=":
+        _ = instructions.pop(0)
+        v = castIfAvailable(instructions.pop(0))
+    globalVariables[name] = v
 
 def handleScope(instructions):
     funcIns = []
@@ -113,37 +134,45 @@ def exec(instructions, stack):
         e = instructions.pop(0)
         if e in arithmetic_ops:
             binaryArith(stack, arithmetic_ops[e])
+        elif str(e).startswith("@"):
+            varName = e[1:]
+            if varName not in globalVariables:
+                raise Exception(f"Variable '{varName}' is not defined")
+            if globalVariables[varName] is None:
+                raise Exception(f"Variable '{varName}' is uninitialized")
+            stack.append(globalVariables[varName])
+        elif str(e).startswith("$"):
+            varName = e[1:]
+            if varName not in globalVariables:
+                raise Exception(f"Variable '{varName}' is not defined")
+            stack.append(varName)
         elif e in lib:
             if e == "show":
-                print(stack[-1])
+                std.show(stack)
             elif e == "dup":
-                stack.append(stack[-1])
+                std.dup(stack)
             elif e == "swap":
-                stack[-1], stack[-2] = stack[-2], stack[-1]
+                std.swap(stack)
             elif e == "drop":
-                stack.pop()
+                std.drop(stack)
             elif e == "ifelse":
-                elseClause = stack.pop()
-                ifClause = stack.pop()
-                ifCond = stack.pop()
-                if ifCond:
-                    exec(lib[ifClause][0].copy(), stack)
-                else:
-                    exec(lib[elseClause][0].copy(), stack)
+                std.ifelse(stack, exec, lib)
+            elif e == "save":
+                std.save(stack, globalVariables)
             else:
                 newInstructions, scoped = lib[e]
-                if not scoped:
-                    exec(newInstructions.copy(), stack)
-                else:
+                if scoped:
                     stack.append(e)
+                else:
+                    exec(newInstructions.copy(), stack)
         elif e == "def":
             handleDef(instructions)
         elif e == "impl":
             handleImpl(instructions)
+        elif e == "var":
+            handleVar(instructions)
         elif e == ".":
-            if stack:
-                print(stack[-1])
-            exit(0)
+            std.stop(stack)
         else:
             e = castIfAvailable(e)
             stack.append(e)
