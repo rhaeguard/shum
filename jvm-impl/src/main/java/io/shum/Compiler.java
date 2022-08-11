@@ -5,27 +5,240 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+import java.io.File;
 import java.io.FileOutputStream;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.util.Map.entry;
 import static org.objectweb.asm.Opcodes.*;
+
+class Parser {
+
+    private int instructionPointer;
+    private final List<Token> tokens;
+
+    public List<Instruction> getInstructions() {
+        return instructions;
+    }
+
+    private final List<Instruction> instructions;
+
+    public Parser(List<Token> tokens) {
+        this.tokens = tokens;
+        this.instructionPointer = 0;
+        this.instructions = new ArrayList<>();
+    }
+
+    private Token next() {
+        var res = tokens.get(instructionPointer);
+        instructionPointer++;
+        return res;
+    }
+
+    private Token prev() {
+        var res = tokens.get(instructionPointer);
+        instructionPointer--;
+        return res;
+    }
+
+    public void parse() {
+        // instructions pointer
+        while (instructionPointer < tokens.size()) {
+            var token = next();
+
+            var parsedInstruction = switch (token.tokenType()) {
+                case DEF -> throw new IllegalStateException("def not implemented yet");
+                case FUNC -> {
+                    var name = next().value();
+                    if (next().tokenType() != TokenType.EQUAL) {
+                        // TODO: better error messages needed
+                        throw new RuntimeException("'=' sign expected");
+                    }
+                    var instrToken = next();
+                    var functionInstructions = new ArrayList<Instruction>();
+                    while (instrToken.tokenType() != TokenType.END) {
+                        var instruction = DefaultFunctionCall
+                                .createFunctionCall(instrToken.value())
+                                .get();
+                        functionInstructions.add(instruction);
+                        instrToken = next();
+                    }
+                    yield new FunctionDeclaration(name, functionInstructions);
+                }
+                case VALUE -> {
+                    var tokenValue = token.value();
+                    if (Utils.isDoubleQuoted(tokenValue) || Utils.isSingleQuoted(tokenValue)) {
+                        yield new Constant(ShumDataType.STRING, tokenValue.substring(1, tokenValue.length() - 1));
+                    }
+
+                    if (Utils.isInteger(tokenValue)) {
+                        yield new Constant(ShumDataType.INT, tokenValue);
+                    }
+
+                    if (Utils.isFloatingPoint(tokenValue)) {
+                        yield new Constant(ShumDataType.DOUBLE, tokenValue);
+                    }
+
+                    throw new RuntimeException(String.format("Token '%s' is unknown", tokenValue));
+                }
+                case FUNCTION_INVOCATION -> {
+                    var functionName = token.value();
+                    yield DefaultFunctionCall.createFunctionCall(functionName).get();
+                }
+                default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
+            };
+
+            this.instructions.add(parsedInstruction);
+        }
+    }
+
+}
+
+class Utils {
+    public static boolean isInteger(String token) {
+        try {
+            Integer.parseInt(token);
+            return true;
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+    }
+
+    public static boolean isFloatingPoint(String token) {
+        try {
+            Double.parseDouble(token);
+            return true;
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+    }
+
+    public static boolean isDoubleQuoted(String str) {
+        return str.startsWith("\"") && str.endsWith("\"");
+    }
+
+    public static boolean isSingleQuoted(String str) {
+        return str.startsWith("'") && str.endsWith("'");
+    }
+}
+
+enum TokenType {
+    VALUE, FUNCTION_INVOCATION,
+    DEF, FUNC, EQUAL, L_CURLY, R_CURLY,
+    END
+}
+
+record Token(String value, TokenType tokenType) {
+}
+
+class Lexer {
+
+    public Token convertTokenToInstruction(String token) {
+        if (token.startsWith("\"") && token.endsWith("\"") || token.startsWith("'") && token.endsWith("'")) {
+            return new Token(token, TokenType.VALUE);
+        }
+        if (Utils.isFloatingPoint(token)) {
+            return new Token(token, TokenType.VALUE);
+        }
+
+        Map<String, TokenType> knownKeywords = Map.of(
+                "def", TokenType.DEF,
+                "func", TokenType.FUNC,
+                "{", TokenType.L_CURLY,
+                "}", TokenType.R_CURLY,
+                "=", TokenType.EQUAL,
+                ".", TokenType.END
+        );
+
+        if (knownKeywords.containsKey(token)) {
+            return new Token(token, knownKeywords.get(token));
+        }
+
+        return new Token(token, TokenType.FUNCTION_INVOCATION);
+    }
+
+    public List<Token> lex(File file) {
+        try (Stream<String> lines = Files.lines(file.toPath())) {
+            return lines
+                    .map(String::trim)
+                    .map(Lexer::shellSplit)
+                    .flatMap(Collection::stream)
+                    .map(this::convertTokenToInstruction)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Reference: https://gist.github.com/raymyers/8077031
+    static List<String> shellSplit(CharSequence string) {
+        var tokens = new ArrayList<String>();
+
+        boolean escaping = false;
+        char quoteChar = ' ';
+        boolean quoting = false;
+        int lastCloseQuoteIndex = Integer.MIN_VALUE;
+
+        var current = new StringBuilder();
+
+        for (int i = 0; i < string.length(); i++) {
+            char c = string.charAt(i);
+            if (escaping) {
+                current.append(c);
+                escaping = false;
+            } else if (c == '\\' && !(quoting && quoteChar == '\'')) {
+                escaping = true;
+            } else if (quoting && c == quoteChar) {
+                quoting = false;
+                lastCloseQuoteIndex = i;
+                current.append(c);
+            } else if (!quoting && (c == '\'' || c == '"')) {
+                quoting = true;
+                quoteChar = c;
+                current.append(c);
+            } else if (!quoting && Character.isWhitespace(c)) {
+                if (current.length() > 0 || lastCloseQuoteIndex == (i - 1)) {
+                    tokens.add(current.toString());
+                    current = new StringBuilder();
+                }
+            } else {
+                current.append(c);
+            }
+        }
+        if (current.length() > 0 || lastCloseQuoteIndex == (string.length() - 1)) {
+            tokens.add(current.toString());
+        }
+
+        return tokens;
+    }
+
+}
 
 public class Compiler {
 
     public static void main(String[] args) {
+        String filename = "hello_world.uk";//args[0];
+        File file = new File(filename);
+        List<Token> tokens = new Lexer().lex(file);
+        Parser parser = new Parser(tokens);
+        parser.parse();
         Compiler compiler = new Compiler();
 
-        var instructions = List.<Instruction>of(
-                new Constant(ShumDataType.INT, "16"), // weight
-                new Constant(ShumDataType.INT, "2"), // height
-                new Constant(ShumDataType.INT, "2"),  // power
-                new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.POW),
-                new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.DIV),
-                new PrintCall(ShumDataType.INT)
-        );
+//        var instructions = List.<Instruction>of(
+//                new Constant(ShumDataType.INT, "16"), // weight
+//                new Constant(ShumDataType.INT, "2"), // height
+//                new Constant(ShumDataType.INT, "2"),  // power
+//                new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.POW),
+//                new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.DIV),
+//                new PrintCall(ShumDataType.INT)
+//        );
 
-        compiler.compile(instructions, null);
+        compiler.compile(parser.getInstructions(), null);
     }
 
     public void compile(List<Instruction> instructions, Map<String, List<Instruction>> functionMap) {
@@ -50,7 +263,17 @@ class ClassGenerator {
         cw.visit(52, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
 
         var mg = new MethodGenerator(cw);
-        mg.generate("main", "([Ljava/lang/String;)V", instructions);
+
+//        instructions.stream()
+//                .filter(ins -> ins instanceof FunctionDeclaration)
+//                .map(ins -> (FunctionDeclaration) ins)
+//                .forEach(fd -> mg.generate(fd.getName(), "()V", fd.getInstructions()));
+
+        List<Instruction> immediatelyExecutedInstructions = instructions.stream()
+                .filter(ins -> !(ins instanceof FunctionDeclaration))
+                .toList();
+
+        mg.generate("main", "([Ljava/lang/String;)V", immediatelyExecutedInstructions);
 
         cw.visitEnd();
     }
@@ -88,15 +311,47 @@ class MethodGenerator {
 
 }
 
-sealed interface Instruction permits Constant, FunctionCall {
+enum ShumDataType {
+    INT, DOUBLE, STRING
+}
+
+sealed interface Instruction extends Opcodes permits Constant, FunctionCall, FunctionDeclaration {
     void apply(MethodVisitor mv);
 }
 
-enum ShumDataType {
-    INT, STRING
+sealed class FunctionDeclaration implements Instruction {
+
+    private final String name;
+    private final List<Instruction> instructions;
+
+    public FunctionDeclaration(String name, List<Instruction> instructions) {
+        this.name = name;
+        this.instructions = instructions;
+    }
+
+    @Override
+    public void apply(MethodVisitor mv) {
+        // TODO
+        throw new UnsupportedOperationException();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<Instruction> getInstructions() {
+        return instructions;
+    }
 }
 
-final class Constant implements Instruction, Opcodes {
+final class AnonymousFunctionDeclaration extends FunctionDeclaration {
+
+    public AnonymousFunctionDeclaration(String name, List<Instruction> instructions) {
+        super(name, instructions);
+    }
+}
+
+final class Constant implements Instruction {
 
     private final ShumDataType dataType;
     private final String value;
@@ -115,7 +370,49 @@ final class Constant implements Instruction, Opcodes {
     }
 }
 
-sealed interface FunctionCall extends Instruction, Opcodes permits ArithmeticFunctionCall, PrintCall {
+sealed interface FunctionCall extends Instruction permits ArithmeticFunctionCall, DefaultFunctionCall, PrintCall {
+}
+
+final class DefaultFunctionCall implements FunctionCall {
+
+    private final String functionName;
+
+    private DefaultFunctionCall(String functionName) {
+        this.functionName = functionName;
+    }
+
+    public static Supplier<FunctionCall> createFunctionCall(String functionName) {
+        if (PROVIDED_FUNCTIONS.containsKey(functionName)) {
+            return PROVIDED_FUNCTIONS.get(functionName);
+        }
+        return () -> new DefaultFunctionCall(functionName);
+    }
+
+    @Override
+    public void apply(MethodVisitor mv) {
+        // TODO: implement this
+        throw new UnsupportedOperationException();
+    }
+
+    private static Map<String, Supplier<FunctionCall>> PROVIDED_FUNCTIONS = Map.ofEntries(
+            // unary functions
+            entry("abs", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.ABS)),
+            entry("neg", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.NEG)),
+            entry("incr", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.INCR)),
+            entry("decr", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.DECR)),
+            entry("not", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.NOT)),
+            // binary functions
+            entry("+", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.ADD)),
+            entry("-", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.SUB)),
+            entry("*", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.MUL)),
+            entry("/", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.DIV)),
+            entry("%", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.REM)),
+            entry("pow", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.POW)),
+            // printing
+            entry("print", () -> new PrintCall(ShumDataType.STRING)),
+            entry("printInt", () -> new PrintCall(ShumDataType.INT)),
+            entry("printDouble", () -> new PrintCall(ShumDataType.DOUBLE))
+    );
 }
 
 final class PrintCall implements FunctionCall {
@@ -131,6 +428,7 @@ final class PrintCall implements FunctionCall {
         String descriptor = switch (type) {
             case STRING -> "Ljava/lang/String;";
             case INT -> "I";
+            case DOUBLE -> "D";
         };
         mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
         mv.visitInsn(SWAP); // we need to swap because println takes System.out as [this] pointer

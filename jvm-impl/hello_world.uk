@@ -1,0 +1,2 @@
+func helloWorld = dup pow down cow .
+16 2 2 pow / printInt
