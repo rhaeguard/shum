@@ -1,2 +1,16 @@
-func helloWorld = dup pow down cow .
-16 2 2 pow / printInt
+// 1 2 + print
+// 1 2 - print
+// 3 2 * print
+// 10 2 / print
+// 10 3 % print
+// 2 5 pow print
+
+// -1 abs print
+// 1 neg print
+// 20 incr print
+// 21 decr print
+
+func demo = "Hello, World" print .
+
+1 2 > print
+0 not print demo
