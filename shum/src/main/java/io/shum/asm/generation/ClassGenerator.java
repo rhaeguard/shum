@@ -21,7 +21,7 @@ public class ClassGenerator {
     }
 
     public void generate(List<Instruction> instructions) {
-        cw.visit(V17, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
+        cw.visit(V1_8, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
 
         var mg = new MethodGenerator(cw);
 

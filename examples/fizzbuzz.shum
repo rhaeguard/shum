@@ -1,0 +1,26 @@
+// Takes start and returns the next number
+// FizzBuzz is implemented using recursion here
+// that is why we need to return the next parameter at the end of processing
+// We print FizzBuzz till <=20
+func fizz_buzz int -> int =
+    dup 20 <= if
+        dup 15 % 0 == if
+            "FizzBuzz"
+        else
+            dup 5 % 0 == if
+                "Buzz"
+            else
+                dup 3 % 0 == if
+                    "Fizz"
+                else
+                    dup
+                end
+            end
+        end
+        print
+        1 + fizz_buzz
+    end
+    return
+end
+
+1 fizz_buzz
