@@ -1,0 +1,20 @@
+// factorial is a function takes an int and returns an int
+func fact int -> int = dup 1 <= if
+        1 *
+    else
+        dup 1 - fact *
+    end
+    return
+end
+
+"Factorial of numbers from 1 to 7" print
+1 fact print
+2 fact print
+3 fact print
+4 fact print
+5 fact print
+6 fact print
+7 fact print
+
+"We can chain factorial calls" print
+3 fact fact print

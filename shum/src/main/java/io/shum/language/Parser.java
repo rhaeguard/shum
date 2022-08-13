@@ -37,11 +37,7 @@ public class Parser {
         return tokens.get(instructionPointer - 1);
     }
 
-    private void prev() {
-        instructionPointer--;
-    }
-
-    public void parse() {
+    public List<Instruction> parse() {
         // instructions pointer
         while (instructionPointer < tokens.size()) {
             var token = next();
@@ -66,6 +62,8 @@ public class Parser {
 
             this.instructions.add(parsedInstruction);
         }
+
+        return this.instructions;
     }
 
     private IfElseCondition parseIfExpression() {
@@ -113,28 +111,12 @@ public class Parser {
 
     private FunctionDeclaration processFuncDeclaration() {
         var name = parseFunctionName();
-        var functionReturns = false;
-        int parameterCount = 0;
-        var nextToken = next();
-        if (nextToken.tokenType() == TokenType.VALUE) {
-            if (Utils.isInteger(nextToken.value())) {
-                parameterCount = Integer.parseInt(nextToken.value());
-            } else {
-                throw new RuntimeException("Function parameter count should be an integer. Given: " + nextToken.value());
-            }
-        } else {
-            prev();
-        }
+        var sig = parseFunctionSignature();
 
-        if (next().tokenType() != TokenType.EQUAL) {
-            // TODO: better error messages needed
-            throw new RuntimeException("'=' sign expected to define a function body");
-        }
         var instrToken = next();
         var functionInstructions = new ArrayList<Instruction>();
         while (instrToken.tokenType() != TokenType.END) {
             if (instrToken.tokenType() == TokenType.RETURN) {
-                functionReturns = true;
                 instrToken = next();
                 continue;
             }
@@ -143,7 +125,38 @@ public class Parser {
             functionInstructions.add(instruction);
             instrToken = next();
         }
-        return new FunctionDeclaration(name, parameterCount, functionReturns, functionInstructions);
+        return new FunctionDeclaration(name, sig, functionInstructions);
+    }
+
+    private FunctionDeclaration.FunctionSignature parseFunctionSignature() {
+        var instrToken = next();
+        var signatureTokens = new ArrayList<Token>();
+
+        while (instrToken.tokenType() != TokenType.EQUAL) {
+            // TODO: maybe pick a better and more descriptive type
+            if (!Set.of(TokenType.FUNCTION_INVOCATION, TokenType.ARROW).contains(instrToken.tokenType())) {
+                throw new RuntimeException("Unexpected token: " + instrToken.value());
+            }
+            signatureTokens.add(instrToken);
+            instrToken = next();
+        }
+
+        var paramTypes = signatureTokens.stream()
+                .takeWhile(t -> t.tokenType() != TokenType.ARROW)
+                .map(Token::value)
+                .toList();
+
+        var returnTypes = signatureTokens.stream()
+                .dropWhile(t -> t.tokenType() != TokenType.ARROW)
+                .skip(1)
+                .map(Token::value)
+                .toList();
+
+        if (returnTypes.size() > 1) {
+            throw new RuntimeException(String.format("Function must return one type. %d given: %s", returnTypes.size(), returnTypes));
+        }
+
+        return new FunctionDeclaration.FunctionSignature(paramTypes, returnTypes);
     }
 
     private String parseFunctionName() {

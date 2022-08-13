@@ -7,4 +7,9 @@ public final class SwapFunction implements BuiltInFunctionCall {
     public void apply(MethodVisitor mv) {
         mv.visitInsn(SWAP);
     }
+
+    @Override
+    public String toString() {
+        return "swap";
+    }
 }

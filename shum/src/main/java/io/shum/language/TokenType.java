@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toMap;
 
 public enum TokenType {
     VALUE, FUNCTION_INVOCATION, TYPE,
+    ARROW("->", true),
     MACRO("macro", true),
     FUNC("func", true),
     RETURN("return", true),

@@ -7,4 +7,9 @@ public final class DropFunction implements BuiltInFunctionCall{
     public void apply(MethodVisitor mv) {
         mv.visitInsn(POP);
     }
+
+    @Override
+    public String toString() {
+        return "drop";
+    }
 }

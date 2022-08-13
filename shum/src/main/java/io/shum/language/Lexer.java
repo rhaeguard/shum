@@ -6,9 +6,16 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Lexer {
+
+    private final File file;
+
+    public Lexer(File file) {
+        this.file = file;
+    }
 
     private Token convertTokenToInstruction(String token) {
         if (token.startsWith("\"") && token.endsWith("\"") || token.startsWith("'") && token.endsWith("'")) {
@@ -25,11 +32,18 @@ public class Lexer {
         return new Token(token, TokenType.FUNCTION_INVOCATION);
     }
 
-    public List<Token> lex(File file) {
+    public List<Token> lex() {
         try (Stream<String> lines = Files.lines(file.toPath())) {
             return lines
                     .map(String::trim)
-                    .map(line -> line.split("//")[0])
+                    .map(line -> {
+                        var pieces = line.split("//");
+                        if (pieces.length == 0) {
+                            return null;
+                        }
+                        return pieces[0];
+                    })
+                    .filter(Objects::nonNull)
                     .map(Lexer::shellSplit)
                     .flatMap(Collection::stream)
                     .map(this::convertTokenToInstruction)

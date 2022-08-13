@@ -7,4 +7,9 @@ public final class DupFunction implements BuiltInFunctionCall {
     public void apply(MethodVisitor mv) {
         mv.visitInsn(DUP);
     }
+
+    @Override
+    public String toString() {
+        return "dup";
+    }
 }

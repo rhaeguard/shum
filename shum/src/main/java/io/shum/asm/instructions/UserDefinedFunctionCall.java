@@ -37,7 +37,7 @@ public final class UserDefinedFunctionCall implements FunctionCall {
         if (maybeFD instanceof Maybe.Some<FunctionDeclaration> fd) {
             mv.visitMethodInsn(
                     INVOKESTATIC,
-                    "DummyClass",
+                    "Main",
                     functionName,
                     fd.getValue().getDescriptor(),
                     false

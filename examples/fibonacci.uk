@@ -1,0 +1,25 @@
+// given F(n) = F(n - 1) + F(n - 2) 
+// the basic idea is that we have to find F(n-2) and we recurse till we reach a base case
+// then swap the answer of F(n-2) with (n-1) in the stack, and recurse till we reach a base case
+// then sum the results
+
+// fib is a function that takes int and returns an int
+func fib int -> int = dup 1 <= if
+        dup 0 <= if
+            drop 0
+        else
+            drop 1
+        end
+    else
+        1 - dup 1 - fib swap fib +
+    end
+    return
+end
+
+0 fib print
+1 fib print
+2 fib print
+3 fib print
+4 fib print
+5 fib print
+6 fib print

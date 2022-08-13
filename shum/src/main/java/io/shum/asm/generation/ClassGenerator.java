@@ -8,8 +8,7 @@ import org.objectweb.asm.ClassWriter;
 import java.io.FileOutputStream;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACC_SUPER;
+import static org.objectweb.asm.Opcodes.*;
 
 public class ClassGenerator {
 
@@ -22,7 +21,7 @@ public class ClassGenerator {
     }
 
     public void generate(List<Instruction> instructions) {
-        cw.visit(52, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
+        cw.visit(V17, ACC_PUBLIC + ACC_SUPER, className, null, "java/lang/Object", null);
 
         var mg = new MethodGenerator(cw);
 

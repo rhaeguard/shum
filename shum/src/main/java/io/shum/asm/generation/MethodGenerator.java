@@ -51,9 +51,13 @@ public class MethodGenerator {
             instruction.apply(mv);
         }
 
-        mv.visitInsn(ARETURN); // add return instruction
+        if (fd.returns()) {
+            mv.visitInsn(ARETURN); // add return instruction
+        } else {
+            mv.visitInsn(RETURN); // add return instruction
+        }
         mv.visitEnd();
-        mv.visitMaxs(1000, 10); //set max stack and max local variables
+        mv.visitMaxs(1000, 10); // set max stack and max local variables
     }
 
 }
