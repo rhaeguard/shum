@@ -17,6 +17,10 @@ public class Compiler {
         String filename = "hello_world.uk";//args[0];
         File file = new File(filename);
         List<Token> tokens = new Lexer().lex(file);
+        for (Token token : tokens) {
+            System.out.println(token);
+        }
+        System.out.println("==========");
         Parser parser = new Parser(tokens, new Context());
         parser.parse();
         Compiler compiler = new Compiler();

@@ -13,7 +13,9 @@ public enum TokenType {
     EQUAL("=", true),
     L_CURLY("{", true),
     R_CURLY("}", true),
-    END(".", true);
+    END("end", true),
+    IF("if", true),
+    ELSE("else", true);
 
     public final String representation;
     public final boolean isKeyword;

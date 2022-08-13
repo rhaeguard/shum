@@ -4,9 +4,10 @@ import io.shum.asm.Context;
 import io.shum.asm.instructions.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+
+import static java.util.Collections.emptyList;
 
 public class Parser {
 
@@ -32,6 +33,10 @@ public class Parser {
         return res;
     }
 
+    private Token current() {
+        return tokens.get(instructionPointer - 1);
+    }
+
     private void prev() {
         instructionPointer--;
     }
@@ -53,6 +58,7 @@ public class Parser {
                     context.createNewFunctionDeclaration(fd);
                     yield fd;
                 }
+                case IF -> parseIfExpression();
                 case VALUE -> parseValue(token);
                 case FUNCTION_INVOCATION -> DefaultFunctionCall.createFunctionCall(token.value(), context);
                 default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
@@ -62,15 +68,32 @@ public class Parser {
         }
     }
 
+    private IfElseCondition parseIfExpression() {
+        var trueMacro = parseMacroBody("true", Set.of(TokenType.END, TokenType.ELSE));
+
+        final MacroDeclaration falseMacro;
+        if (current().tokenType() == TokenType.ELSE) {
+            falseMacro = parseMacroBody("", Set.of(TokenType.END));
+        } else {
+            next(); // it's the ELSE or END token, so we need to move to the next token
+            falseMacro = new MacroDeclaration("false", emptyList());
+        }
+        return new IfElseCondition(trueMacro, falseMacro);
+    }
+
     private MacroDeclaration parseMacroDeclaration() {
         var name = parseFunctionName();
         if (next().tokenType() != TokenType.EQUAL) {
             // TODO: better error messages needed
             throw new RuntimeException("'=' sign expected to define a macro body");
         }
+        return parseMacroBody(name, Set.of(TokenType.END));
+    }
+
+    private MacroDeclaration parseMacroBody(String name, Set<TokenType> terminationTokens) {
         var instrToken = next();
         var macroInstructions = new ArrayList<Instruction>();
-        while (instrToken.tokenType() != TokenType.END) {
+        while (!terminationTokens.contains(instrToken.tokenType())) {
             var instruction = parseCallableBodyInstruction(instrToken);
             macroInstructions.add(instruction);
             instrToken = next();
@@ -82,8 +105,9 @@ public class Parser {
     private Instruction parseCallableBodyInstruction(Token instrToken) {
         return switch (instrToken.tokenType()) {
             case VALUE -> parseValue(instrToken);
+            case IF -> parseIfExpression();
             case FUNCTION_INVOCATION -> DefaultFunctionCall.createFunctionCall(instrToken.value(), context);
-            default -> throw new IllegalStateException("Unexpected value: " + instrToken.tokenType());
+            default -> throw new IllegalStateException("Unexpected token: " + instrToken.tokenType());
         };
     }
 
