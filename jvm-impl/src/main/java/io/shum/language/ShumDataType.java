@@ -1,5 +1,11 @@
 package io.shum.language;
 
 public enum ShumDataType {
-    INT, DOUBLE, STRING
+    INT("int"), DOUBLE("double"), STRING("string");
+
+    final String name;
+
+    ShumDataType(String name) {
+        this.name = name;
+    }
 }

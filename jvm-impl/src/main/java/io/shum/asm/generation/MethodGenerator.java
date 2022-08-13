@@ -1,5 +1,6 @@
 package io.shum.asm.generation;
 
+import io.shum.asm.instructions.FunctionDeclaration;
 import io.shum.asm.instructions.Instruction;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.commons.LocalVariablesSorter;
@@ -17,17 +18,41 @@ public class MethodGenerator {
     }
 
     public void generate(String methodName, String descriptor, List<Instruction> instructions) {
-        var mv = new LocalVariablesSorter(ACC_PUBLIC + ACC_STATIC, descriptor,
-                cw.visitMethod(ACC_PUBLIC + ACC_STATIC, methodName, descriptor, null, null));
+        var mv = new LocalVariablesSorter(
+                ACC_PUBLIC + ACC_STATIC,
+                descriptor,
+                cw.visitMethod(ACC_PUBLIC + ACC_STATIC, methodName, descriptor, null, null)
+        );
 
         for (var instruction : instructions) {
             instruction.apply(mv);
         }
 
-        mv.visitInsn(RETURN); //add return instruction
-
+        mv.visitInsn(RETURN); // add return instruction
         mv.visitEnd();
+        mv.visitMaxs(1000, 10); // set max stack and max local variables
+    }
 
+    public void generate(FunctionDeclaration fd) {
+        var descriptor = fd.getDescriptor();
+        var methodName = fd.getName();
+
+        var mv = new LocalVariablesSorter(
+                ACC_PUBLIC + ACC_STATIC,
+                descriptor,
+                cw.visitMethod(ACC_PUBLIC + ACC_STATIC, methodName, descriptor, null, null)
+        );
+
+        for (int i = 0; i < fd.getParameterCount(); i++) {
+            mv.visitVarInsn(ALOAD, i);
+        }
+
+        for (var instruction : fd.getInstructions()) {
+            instruction.apply(mv);
+        }
+
+        mv.visitInsn(ARETURN); // add return instruction
+        mv.visitEnd();
         mv.visitMaxs(1000, 10); //set max stack and max local variables
     }
 

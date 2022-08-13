@@ -2,6 +2,7 @@ package io.shum.asm.generation;
 
 import io.shum.asm.instructions.FunctionDeclaration;
 import io.shum.asm.instructions.Instruction;
+import io.shum.asm.instructions.MacroDeclaration;
 import org.objectweb.asm.ClassWriter;
 
 import java.io.FileOutputStream;
@@ -27,11 +28,10 @@ public class ClassGenerator {
 
         instructions.stream()
                 .filter(ins -> ins instanceof FunctionDeclaration)
-                .map(ins -> (FunctionDeclaration) ins)
-                .forEach(fd -> mg.generate(fd.getName(), "()V", fd.getInstructions()));
+                .forEach(ins -> mg.generate(((FunctionDeclaration) ins)));
 
-        List<Instruction> immediatelyExecutedInstructions = instructions.stream()
-                .filter(ins -> !(ins instanceof FunctionDeclaration))
+        var immediatelyExecutedInstructions = instructions.stream()
+                .filter(ins -> !(ins instanceof FunctionDeclaration || ins instanceof MacroDeclaration))
                 .toList();
 
         mg.generate("main", "([Ljava/lang/String;)V", immediatelyExecutedInstructions);

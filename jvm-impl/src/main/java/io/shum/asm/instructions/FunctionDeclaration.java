@@ -3,15 +3,26 @@ package io.shum.asm.instructions;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public sealed class FunctionDeclaration implements Instruction permits AnonymousFunctionDeclaration {
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.IntStream.range;
+
+public final class FunctionDeclaration implements Instruction {
 
     private final String name;
+    private final int parameterCount;
+    private final boolean returns;
+    private final String descriptor;
     private final List<Instruction> instructions;
 
-    public FunctionDeclaration(String name, List<Instruction> instructions) {
+    public FunctionDeclaration(String name, int parameterCount, boolean returns, List<Instruction> instructions) {
         this.name = name;
+        this.parameterCount = parameterCount;
         this.instructions = instructions;
+        this.returns = returns;
+        this.descriptor = createMethodDescriptor();
     }
 
     @Override
@@ -28,8 +39,25 @@ public sealed class FunctionDeclaration implements Instruction permits Anonymous
         return instructions;
     }
 
+    private String createMethodDescriptor() {
+        var returnType = returns ? "Ljava/lang/Object;" : "V";
+        var params = range(0, parameterCount)
+                .mapToObj(i -> "Ljava/lang/Object;")
+                .collect(joining());
+
+        return String.format("(%s)%s", params, returnType);
+    }
+
     @Override
     public String toString() {
-        return String.format("%s [%s]", name, instructions.toString());
+        return String.format("%s [%d]%s[%s]", name, parameterCount, returns ? " <returns> " : " ", instructions.toString());
+    }
+
+    public String getDescriptor() {
+        return descriptor;
+    }
+
+    public int getParameterCount() {
+        return parameterCount;
     }
 }

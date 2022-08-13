@@ -1,5 +1,6 @@
 package io.shum;
 
+import io.shum.asm.Context;
 import io.shum.asm.generation.ClassGenerator;
 import io.shum.asm.instructions.Instruction;
 import io.shum.language.Lexer;
@@ -16,7 +17,7 @@ public class Compiler {
         String filename = "hello_world.uk";//args[0];
         File file = new File(filename);
         List<Token> tokens = new Lexer().lex(file);
-        Parser parser = new Parser(tokens);
+        Parser parser = new Parser(tokens, new Context());
         parser.parse();
         Compiler compiler = new Compiler();
         System.out.println("Compiling...");

@@ -1,5 +1,7 @@
 package io.shum.asm.instructions;
 
+import io.shum.asm.Context;
+import io.shum.utils.Maybe;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Map;
@@ -10,16 +12,18 @@ import static java.util.Map.entry;
 public final class DefaultFunctionCall implements FunctionCall {
 
     private final String functionName;
+    private final Context context;
 
-    private DefaultFunctionCall(String functionName) {
+    private DefaultFunctionCall(String functionName, Context context) {
         this.functionName = functionName;
+        this.context = context;
     }
 
-    public static Supplier<FunctionCall> createFunctionCall(String functionName) {
+    public static FunctionCall createFunctionCall(String functionName, Context context) {
         if (PROVIDED_FUNCTIONS.containsKey(functionName)) {
-            return PROVIDED_FUNCTIONS.get(functionName);
+            return PROVIDED_FUNCTIONS.get(functionName).get();
         }
-        return () -> new DefaultFunctionCall(functionName);
+        return new DefaultFunctionCall(functionName, context);
     }
 
     @Override
@@ -27,7 +31,23 @@ public final class DefaultFunctionCall implements FunctionCall {
         // TODO: class name is hardcoded
         // TODO: method descriptor may not always be the same ()V
         // TODO: methods may not always be 'static'
-        mv.visitMethodInsn(INVOKESTATIC, "DummyClass", functionName, "()V", false);
+
+        var maybeFD = context.getFunctionDeclaration(functionName);
+        if (maybeFD instanceof Maybe.Some<FunctionDeclaration> fd) {
+            mv.visitMethodInsn(
+                    INVOKESTATIC,
+                    "DummyClass",
+                    functionName,
+                    fd.getValue().getDescriptor(),
+                    false
+            );
+        } else {
+            var maybeMD = context.getMacroDeclaration(functionName);
+            if (maybeMD instanceof Maybe.Some<MacroDeclaration> md) {
+                md.getValue().apply(mv);
+            }
+        }
+
     }
 
     private static final Map<String, Supplier<FunctionCall>> PROVIDED_FUNCTIONS = Map.ofEntries(

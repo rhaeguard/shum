@@ -1,5 +1,7 @@
 package io.shum.language;
 
+import java.util.regex.Pattern;
+
 public class Utils {
     public static boolean isInteger(String token) {
         try {
@@ -17,6 +19,12 @@ public class Utils {
         } catch (NumberFormatException nfe) {
             return false;
         }
+    }
+
+    public static boolean isProperFunctionName(String token) {
+        // a-zA-Z_0-9-
+        var compile = Pattern.compile("[a-zA-Z_\\-][a-zA-Z_0-9\\-]*");
+        return compile.matcher(token).matches();
     }
 
     public static boolean isDoubleQuoted(String str) {
