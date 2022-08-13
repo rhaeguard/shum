@@ -3,8 +3,6 @@ package io.shum.asm.instructions;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;

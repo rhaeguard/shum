@@ -1,9 +1,9 @@
-package io.shum.asm.instructions;
+package io.shum.asm.instructions.builtin;
 
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 
-public final class ComparisonFunctionCall implements FunctionCall {
+public final class ComparisonFunctionCall implements BuiltInFunctionCall {
 
     public enum Operation {
         GREATER_THAN, GREATER_EQUAL, LESS_THAN, LESS_EQUAL, EQUAL, NOT_EQUAL, NOT
@@ -11,7 +11,7 @@ public final class ComparisonFunctionCall implements FunctionCall {
 
     private final Operation operation;
 
-    ComparisonFunctionCall(Operation operation) {
+    public ComparisonFunctionCall(Operation operation) {
         this.operation = operation;
     }
 

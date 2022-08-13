@@ -1,3 +1,0 @@
-def fact
-impl fact = dup 1 <= { 1 * } { dup 1 - fact * } ifelse .
-5 fact show

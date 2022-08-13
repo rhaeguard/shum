@@ -1,8 +1,8 @@
-package io.shum.asm.instructions;
+package io.shum.asm.instructions.builtin;
 
 import org.objectweb.asm.MethodVisitor;
 
-public final class PrintCall implements FunctionCall {
+public final class PrintFunction implements BuiltInFunctionCall {
 
     @Override
     public void apply(MethodVisitor mv) {

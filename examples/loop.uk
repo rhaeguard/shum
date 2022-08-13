@@ -1,8 +1,0 @@
-var from = 10
-var till = 25
-impl loop = 
-    @from @till <= 
-    { @from show 1 + $from save drop loop } 
-    {  } 
-    ifelse .
-loop

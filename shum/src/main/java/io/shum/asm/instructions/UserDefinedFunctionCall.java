@@ -1,6 +1,7 @@
 package io.shum.asm.instructions;
 
 import io.shum.asm.Context;
+import io.shum.asm.instructions.builtin.*;
 import io.shum.utils.Maybe;
 import org.objectweb.asm.MethodVisitor;
 
@@ -9,12 +10,12 @@ import java.util.function.Supplier;
 
 import static java.util.Map.entry;
 
-public final class DefaultFunctionCall implements FunctionCall {
+public final class UserDefinedFunctionCall implements FunctionCall {
 
     private final String functionName;
     private final Context context;
 
-    private DefaultFunctionCall(String functionName, Context context) {
+    private UserDefinedFunctionCall(String functionName, Context context) {
         this.functionName = functionName;
         this.context = context;
     }
@@ -23,7 +24,7 @@ public final class DefaultFunctionCall implements FunctionCall {
         if (PROVIDED_FUNCTIONS.containsKey(functionName)) {
             return PROVIDED_FUNCTIONS.get(functionName).get();
         }
-        return new DefaultFunctionCall(functionName, context);
+        return new UserDefinedFunctionCall(functionName, context);
     }
 
     @Override
@@ -73,11 +74,11 @@ public final class DefaultFunctionCall implements FunctionCall {
             entry("!=", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.NOT_EQUAL)),
             entry("not", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.NOT)),
             // printing
-            entry("print", PrintCall::new),
+            entry("print", PrintFunction::new),
             // other crucial functions
-            entry("dup", () -> null),
-            entry("swap", () -> null)
-
+            entry("dup", DupFunction::new),
+            entry("swap", SwapFunction::new),
+            entry("drop", DropFunction::new)
     );
 
     @Override

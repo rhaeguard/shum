@@ -1,4 +1,4 @@
-package io.shum.asm.instructions;
+package io.shum.asm.instructions.builtin;
 
 import org.objectweb.asm.MethodVisitor;
 

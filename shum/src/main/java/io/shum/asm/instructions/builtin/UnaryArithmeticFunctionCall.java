@@ -1,6 +1,7 @@
-package io.shum.asm.instructions;
+package io.shum.asm.instructions.builtin;
 
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 public final class UnaryArithmeticFunctionCall implements ArithmeticFunctionCall {
     public enum Operation {
@@ -24,9 +25,9 @@ public final class UnaryArithmeticFunctionCall implements ArithmeticFunctionCall
     }
 
     private void executeOperation(String mathClassMethodName, MethodVisitor mv) {
-        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J", false);
-        mv.visitMethodInsn(INVOKESTATIC, "java/lang/Math", mathClassMethodName, "(J)J", false);
-        mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J", false);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Math", mathClassMethodName, "(J)J", false);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
     }
 
     @Override

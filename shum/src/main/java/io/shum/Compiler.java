@@ -14,7 +14,7 @@ import java.util.Map;
 public class Compiler {
 
     public static void main(String[] args) {
-        String filename = "hello_world.uk";//args[0];
+        String filename = "playground.uk";//args[0];
         File file = new File(filename);
         List<Token> tokens = new Lexer().lex(file);
         for (Token token : tokens) {

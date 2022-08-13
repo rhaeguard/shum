@@ -60,7 +60,7 @@ public class Parser {
                 }
                 case IF -> parseIfExpression();
                 case VALUE -> parseValue(token);
-                case FUNCTION_INVOCATION -> DefaultFunctionCall.createFunctionCall(token.value(), context);
+                case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(token.value(), context);
                 default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
             };
 
@@ -106,7 +106,7 @@ public class Parser {
         return switch (instrToken.tokenType()) {
             case VALUE -> parseValue(instrToken);
             case IF -> parseIfExpression();
-            case FUNCTION_INVOCATION -> DefaultFunctionCall.createFunctionCall(instrToken.value(), context);
+            case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(instrToken.value(), context);
             default -> throw new IllegalStateException("Unexpected token: " + instrToken.tokenType());
         };
     }
