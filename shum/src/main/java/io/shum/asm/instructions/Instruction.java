@@ -1,5 +1,6 @@
 package io.shum.asm.instructions;
 
+import io.shum.asm.instructions.builtin.StringFunction;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 

@@ -5,6 +5,7 @@ import io.shum.asm.instructions.builtin.*;
 import io.shum.utils.Maybe;
 import org.objectweb.asm.MethodVisitor;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -51,35 +52,43 @@ public final class UserDefinedFunctionCall implements FunctionCall {
 
     }
 
-    private static final Map<String, Supplier<FunctionCall>> PROVIDED_FUNCTIONS = Map.ofEntries(
-            // unary functions
-            entry("abs", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.ABS)),
-            entry("neg", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.NEG)),
-            entry("incr", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.INCR)),
-            entry("decr", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.DECR)),
-            // binary functions
-            //      arithmetic operations
-            entry("+", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.ADD)),
-            entry("-", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.SUB)),
-            entry("*", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.MUL)),
-            entry("/", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.DIV)),
-            entry("%", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.REM)),
-            entry("pow", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.POW)),
-            //      comparison operations
-            entry(">", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.GREATER_THAN)),
-            entry(">=", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.GREATER_EQUAL)),
-            entry("<", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.LESS_THAN)),
-            entry("<=", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.LESS_EQUAL)),
-            entry("==", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.EQUAL)),
-            entry("!=", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.NOT_EQUAL)),
-            entry("not", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.NOT)),
-            // printing
-            entry("print", PrintFunction::new),
-            // other crucial functions
-            entry("dup", DupFunction::new),
-            entry("swap", SwapFunction::new),
-            entry("drop", DropFunction::new)
-    );
+    private static final Map<String, Supplier<FunctionCall>> PROVIDED_FUNCTIONS = getAllProvidedFunctions();
+
+    private static Map<String, Supplier<FunctionCall>> getAllProvidedFunctions() {
+        Map<String, Supplier<FunctionCall>> map =  Map.ofEntries(
+                // unary functions
+                entry("abs", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.ABS)),
+                entry("neg", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.NEG)),
+                entry("incr", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.INCR)),
+                entry("decr", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.DECR)),
+                // binary functions
+                //      arithmetic operations
+                entry("+", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.ADD)),
+                entry("-", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.SUB)),
+                entry("*", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.MUL)),
+                entry("/", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.DIV)),
+                entry("%", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.REM)),
+                entry("pow", () -> new BinaryArithmeticFunctionCall(BinaryArithmeticFunctionCall.Operation.POW)),
+                //      comparison operations
+                entry(">", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.GREATER_THAN)),
+                entry(">=", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.GREATER_EQUAL)),
+                entry("<", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.LESS_THAN)),
+                entry("<=", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.LESS_EQUAL)),
+                entry("==", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.EQUAL)),
+                entry("!=", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.NOT_EQUAL)),
+                entry("not", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.NOT)),
+                // printing
+                entry("print", PrintFunction::new),
+                // other crucial functions
+                entry("dup", DupFunction::new),
+                entry("swap", SwapFunction::new),
+                entry("drop", DropFunction::new)
+        );
+
+        HashMap<String, Supplier<FunctionCall>> stringSupplierHashMap = new HashMap<>(map);
+        stringSupplierHashMap.putAll(StringFunction.getAllSupportedJavaStringOperations());
+        return stringSupplierHashMap;
+    }
 
     @Override
     public String toString() {

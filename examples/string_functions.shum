@@ -1,37 +1,3 @@
-// func add_mul int int = + 8 * return .
-// 1 2 add_mul print
-// macro add_mul = + 8 * .
-// 1 2 add_mul print
-
-// 1 2 >= if
-//     "Hello"
-// else
-//     28 14 / 3 > if
-//         "Halcyon age"
-//     else
-//         "Angel youth"
-//     end
-// end
-// print
-
-// "Hello, World!" print
-
-// start -> next
-
-// 1 loop dup 20 <= do
-//     dup 15 % 0 == if
-//         "FizzBuzz"
-//     else dup 5 % 0 == if
-//         "Buzz"
-//     else dup 3 % 0 == if
-//         "Fizz"
-//     else
-//         dup
-//     end end end
-//     print
-//     1 +
-// end
-
 "hello"             upper       print
 "HellO"             lower       print
 "  hello   "        trim        print
@@ -43,8 +9,8 @@
 "hello world"       len         print
 "hello world"       0 7 substr  print
 "hello" "world"     ++          print
-"HELLO" isUpper print
-"hello" isUpper print
+"HELLO"             isUpper     print
+"hello" i           isLower     print
 
 // custom capitalization function
 // written by using built-in string functions
