@@ -32,13 +32,25 @@ public class Compiler {
     }
 
     public static void main(String[] args) {
-        var filename = args[0];
+        if (args.length == 0) {
+            System.err.println("usage: <file>");
+            System.exit(2);
+        }
+        compile(args);
+    }
+
+    private static void compile(String[] args) {
+        var filename = args[args.length - 1];
+        if (!filename.endsWith(".shum")) {
+            System.err.println("Expected a .shum file");
+            System.exit(2);
+        }
         var file = new File(filename);
         var tokens = new Lexer(file).lex();
         var instructions = new Parser(tokens, new Context()).parse();
 
         new Compiler(instructions)
-                .debugInstructions()
+//                .debugInstructions()
                 .compile();
     }
 }
