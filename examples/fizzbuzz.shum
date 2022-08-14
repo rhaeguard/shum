@@ -2,7 +2,7 @@
 // FizzBuzz is implemented using recursion here
 // that is why we need to return the next parameter at the end of processing
 // We print FizzBuzz till <=20
-func fizz_buzz int -> int =
+func fizz_buzz_recursive int -> int =
     dup 20 <= if
         dup 15 % 0 == if
             "FizzBuzz"
@@ -18,9 +18,29 @@ func fizz_buzz int -> int =
             end
         end
         print
-        1 + fizz_buzz
+        1 + fizz_buzz_recursive
     end
     return
 end
 
-1 fizz_buzz
+func fizz_buzz_loop =
+    1 loop dup 20 <= do
+        dup 15 % 0 == if
+            "FizzBuzz"
+        else dup 5 % 0 == if
+            "Buzz"
+        else dup 3 % 0 == if
+            "Fizz"
+        else
+            dup
+        end end end
+        print
+        1 +
+    end
+end
+
+"fizz buzz recursive" print
+1 fizz_buzz_recursive
+"==============" print
+"fizz buzz iterative" print
+fizz_buzz_loop

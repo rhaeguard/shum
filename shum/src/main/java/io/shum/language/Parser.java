@@ -43,22 +43,21 @@ public class Parser {
             var token = next();
 
             var parsedInstruction = switch (token.tokenType()) {
-                case MACRO -> {
-                    var md = parseMacroDeclaration();
-                    context.createNewMacroDeclaration(md);
-                    yield md;
-                }
-                case FUNC -> {
-                    var fd = processFuncDeclaration();
-                    // remember user-defined functions and signatures
-                    context.createNewFunctionDeclaration(fd);
-                    yield fd;
-                }
-                case IF -> parseIfExpression();
+                case MACRO -> parseMacroDeclaration();
+                case FUNC -> processFuncDeclaration();
+                case IF -> parseIfStatement();
+                case LOOP -> parseLoopStatement();
                 case VALUE -> parseValue(token);
                 case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(token.value(), context);
                 default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
             };
+
+            // remember user-defined functions and macros
+            if (parsedInstruction instanceof MacroDeclaration md) {
+                context.createNewMacroDeclaration(md);
+            } else if (parsedInstruction instanceof FunctionDeclaration fd) {
+                context.createNewFunctionDeclaration(fd);
+            }
 
             this.instructions.add(parsedInstruction);
         }
@@ -66,12 +65,18 @@ public class Parser {
         return this.instructions;
     }
 
-    private IfElseCondition parseIfExpression() {
+    private LoopStatement parseLoopStatement() {
+        var conditionMacro = parseMacroBody("condition", Set.of(TokenType.DO));
+        var loopBodyMacro = parseMacroBody("body", Set.of(TokenType.END));
+        return new LoopStatement(conditionMacro, loopBodyMacro);
+    }
+
+    private IfElseCondition parseIfStatement() {
         var trueMacro = parseMacroBody("true", Set.of(TokenType.END, TokenType.ELSE));
 
         final MacroDeclaration falseMacro;
         if (current().tokenType() == TokenType.ELSE) {
-            falseMacro = parseMacroBody("", Set.of(TokenType.END));
+            falseMacro = parseMacroBody("false", Set.of(TokenType.END));
         } else {
             next(); // it's the ELSE or END token, so we need to move to the next token
             falseMacro = new MacroDeclaration("false", emptyList());
@@ -103,7 +108,8 @@ public class Parser {
     private Instruction parseCallableBodyInstruction(Token instrToken) {
         return switch (instrToken.tokenType()) {
             case VALUE -> parseValue(instrToken);
-            case IF -> parseIfExpression();
+            case IF -> parseIfStatement();
+            case LOOP -> parseLoopStatement();
             case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(instrToken.value(), context);
             default -> throw new IllegalStateException("Unexpected token: " + instrToken.tokenType());
         };

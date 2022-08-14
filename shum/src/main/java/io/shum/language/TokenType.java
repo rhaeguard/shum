@@ -16,7 +16,10 @@ public enum TokenType {
     R_CURLY("}", true),
     END("end", true),
     IF("if", true),
-    ELSE("else", true);
+    ELSE("else", true),
+    LOOP("loop", true),
+    DO("do", true),
+    BREAK("break", true);
 
     public final String representation;
     public final boolean isKeyword;

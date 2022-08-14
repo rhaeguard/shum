@@ -17,25 +17,35 @@
 // "Hello, World!" print
 
 // start -> next
-func fizz_buzz int -> int =
-    dup 20 <= if
+
+// 1 loop dup 20 <= do
+//     dup 15 % 0 == if
+//         "FizzBuzz"
+//     else dup 5 % 0 == if
+//         "Buzz"
+//     else dup 3 % 0 == if
+//         "Fizz"
+//     else
+//         dup
+//     end end end
+//     print
+//     1 +
+// end
+
+func fizz_buzz_loop =
+    1 loop dup 20 <= do
         dup 15 % 0 == if
             "FizzBuzz"
+        else dup 5 % 0 == if
+            "Buzz"
+        else dup 3 % 0 == if
+            "Fizz"
         else
-            dup 5 % 0 == if
-                "Buzz"
-            else
-                dup 3 % 0 == if
-                    "Fizz"
-                else
-                    dup
-                end
-            end
-        end
+            dup
+        end end end
         print
-        1 + fizz_buzz
+        1 +
     end
-    return
 end
 
-1 fizz_buzz
+fizz_buzz_loop
