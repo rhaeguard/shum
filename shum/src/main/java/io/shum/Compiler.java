@@ -7,6 +7,9 @@ import io.shum.language.Lexer;
 import io.shum.language.Parser;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
 public class Compiler {
@@ -17,16 +20,32 @@ public class Compiler {
         this.instructions = instructions;
     }
 
-    public void compile() {
+    public void compile(boolean shouldRun) {
         var classGenerator = new ClassGenerator("Main");
         classGenerator.generate(instructions);
         classGenerator.saveToFile();
+        if (shouldRun) {
+            run(classGenerator);
+        }
     }
 
-    private Compiler debugInstructions() {
-        System.out.println("Instructions:");
-        for (var instruction : instructions) {
-            System.out.println(" - " + instruction.toString());
+    public void run(ClassGenerator classGenerator) {
+        var clazz = classGenerator.generateClass();
+        try {
+            String[] strings = {};
+            Method main = clazz.getMethod("main", strings.getClass());
+            main.invoke(null, (Object) new String[]{});
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Compiler debugInstructions(boolean shouldDebugInstructions) {
+        if (shouldDebugInstructions) {
+            System.out.println("Instructions:");
+            for (var instruction : instructions) {
+                System.out.println(" - " + instruction.toString());
+            }
         }
         return this;
     }
@@ -40,17 +59,29 @@ public class Compiler {
     }
 
     private static void compile(String[] args) {
+        if (args.length < 1) {
+            System.err.println("Usage: [OPTIONS] <file>");
+            System.err.println("Options:");
+            System.err.println(" --run      compiles and runs the code");
+        }
+
         var filename = args[args.length - 1];
         if (!filename.endsWith(".shum")) {
             System.err.println("Expected a .shum file");
             System.exit(2);
         }
+
+        var options = Arrays.asList(Arrays.copyOfRange(args, 0, args.length - 1));
+
+        boolean shouldRun = options.contains("--run");
+        boolean debugInstructions = options.contains("--debugInstructions");
+
         var file = new File(filename);
         var tokens = new Lexer(file).lex();
         var instructions = new Parser(tokens, new Context()).parse();
 
         new Compiler(instructions)
-//                .debugInstructions()
-                .compile();
+                .debugInstructions(debugInstructions)
+                .compile(shouldRun);
     }
 }

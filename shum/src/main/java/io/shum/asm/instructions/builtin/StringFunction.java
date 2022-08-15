@@ -32,8 +32,19 @@ public final class StringFunction implements BuiltInFunctionCall {
                 ));
     }
 
+    @Override
+    public String toString() {
+        return operation.shortName;
+    }
 
+    /**
+     * Represents a String function/operation that we are using directly from Java library
+     * There are two types of operations we provide:
+     * 1 - functions that already exist in Java standard library
+     * 2 - functions that do not exist in Java standard library, but can be easily constructed using existing ones
+     */
     public enum StringOperation {
+        /* Already existing methods */
         UPPER("upper", "toUpperCase", "()Ljava/lang/String;"),
         LOWER("lower", "toLowerCase", "()Ljava/lang/String;"),
         TRIM("trim", "trim", "()Ljava/lang/String;"),

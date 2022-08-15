@@ -46,4 +46,24 @@ public class ClassGenerator {
         }
     }
 
+    public Class<?> generateClass() {
+        var bc = cw.toByteArray();
+
+        return new ClassLoader(Thread.currentThread().getContextClassLoader()) {
+            public Class<?> define(String className, byte[] bytecode) {
+                return super.defineClass(className, bytecode, 0, bytecode.length);
+            }
+        }.define("Main", bc);
+    }
+
+    public static class DynamicClassLoader extends ClassLoader {
+        public DynamicClassLoader(ClassLoader parent) {
+            super(parent);
+        }
+
+        public Class<?> define(String className, byte[] bytecode) {
+            return super.defineClass(className, bytecode, 0, bytecode.length);
+        }
+    }
+
 }
