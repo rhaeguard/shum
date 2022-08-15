@@ -22,3 +22,20 @@ loop dup 1000 < do
 end 
 drop    // drop the number which is 1000
 print   // print the sum
+
+////////////////////////////////////////////////////
+/// MATH solution
+////////////////////////////////////////////////////
+
+func sumTill int -> int = dup 1 + * 2 / end
+
+macro euler = 
+    333 sumTill 3 *
+    199 sumTill 5 *
+    +
+    66 sumTill 15 *
+    -
+    print
+end
+
+euler
