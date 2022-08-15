@@ -10,7 +10,7 @@
 "hello world"       0 7 substr  print
 "hello" "world"     ++          print
 "HELLO"             isUpper     print
-"hello" i           isLower     print
+"hello"             isLower     print
 
 // custom capitalization function
 // written by using built-in string functions
