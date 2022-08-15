@@ -1,23 +1,11 @@
 // If we list all the natural numbers below 10 that are multiples of 3 or 5,
 // we get 3, 5, 6 and 9. The sum of these multiples is 23.
 // Find the sum of all the multiples of 3 or 5 below 1000.
+// Link: https://projecteuler.net/problem=1
 
-// 0 3 loop dup 1000 < do
-//     dup 5 % 0 == if        
-//         dup                      
-//     else dup 3 % 0 == if        
-//         dup                     
-//     else
-//         0
-//     end end
-//     dup2over1 drop drop
-//     +
-//     swap
-//     1 +
-// end drop print
-
-
-0 3 loop dup 1000 < do
+0 // sum 
+3 // starting from
+loop dup 1000 < do
     dup                             // [sum, num, num]
     dup 5 % 0 ==                    // [sum, num, num, true/false]
     swap                            // [sum, num, true/false, num]
@@ -31,6 +19,6 @@
     +                               // [num, num + sum]
     swap                            // [sum + num, num]
     1 +                             // [sum + num, num + 1]
-end drop print
-
-// 1 not 0 not or print
+end 
+drop    // drop the number which is 1000
+print   // print the sum

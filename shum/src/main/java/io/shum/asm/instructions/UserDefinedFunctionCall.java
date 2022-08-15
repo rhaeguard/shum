@@ -55,7 +55,7 @@ public final class UserDefinedFunctionCall implements FunctionCall {
     private static final Map<String, Supplier<FunctionCall>> PROVIDED_FUNCTIONS = getAllProvidedFunctions();
 
     private static Map<String, Supplier<FunctionCall>> getAllProvidedFunctions() {
-        Map<String, Supplier<FunctionCall>> map =  Map.ofEntries(
+        Map<String, Supplier<FunctionCall>> someEntries =  Map.ofEntries(
                 // unary functions
                 entry("abs", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.ABS)),
                 entry("neg", () -> new UnaryArithmeticFunctionCall(UnaryArithmeticFunctionCall.Operation.NEG)),
@@ -80,14 +80,15 @@ public final class UserDefinedFunctionCall implements FunctionCall {
                 // printing
                 entry("print", PrintFunction::new),
                 // other crucial functions
-                entry("dup", DupFunction::new),
                 entry("swap", SwapFunction::new),
                 entry("drop", DropFunction::new)
         );
 
-        HashMap<String, Supplier<FunctionCall>> stringSupplierHashMap = new HashMap<>(map);
-        stringSupplierHashMap.putAll(StringFunction.getAllSupportedJavaStringOperations());
-        return stringSupplierHashMap;
+        var allFunc = new HashMap<>(someEntries);
+        allFunc.putAll(StringFunction.getAllSupportedJavaStringOperations());
+        allFunc.putAll(DupFunction.getAllDupOperations());
+        allFunc.putAll(LogicalFunction.getAllLogicalOperators());
+        return allFunc;
     }
 
     @Override

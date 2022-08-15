@@ -5,6 +5,7 @@ import io.shum.asm.generation.ClassGenerator;
 import io.shum.asm.instructions.Instruction;
 import io.shum.language.Lexer;
 import io.shum.language.Parser;
+import io.shum.language.Token;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
