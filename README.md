@@ -173,7 +173,7 @@ A little bit of an exaggerated example of a function using local variables.
 ```
 func sumTill int -> int =
     let till:int
-    till            // take the value of the first parameter since it is pushed onto the stack
+    till!            // take the value of the first parameter since it is pushed onto the stack
 
     let counter:int
     0 counter!
