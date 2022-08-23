@@ -49,6 +49,8 @@ public class Parser {
                 case LOOP -> parseLoopStatement();
                 case VALUE -> parseValue(token);
                 case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(token.value(), context);
+                case LET -> parseLet();
+                case VARIABLE_LOAD, VARIABLE_STORE -> parseVariableOp(token);
                 default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
             };
 
@@ -57,12 +59,43 @@ public class Parser {
                 context.createNewMacroDeclaration(md);
             } else if (parsedInstruction instanceof FunctionDeclaration fd) {
                 context.createNewFunctionDeclaration(fd);
+            } else if (parsedInstruction instanceof VariableDeclaration vd) {
+                context.createNewStaticVariableDeclaration(vd);
             }
 
             this.instructions.add(parsedInstruction);
         }
 
         return this.instructions;
+    }
+
+    private VariableOperation parseVariableOp(Token token) {
+        var op = token.tokenType() == TokenType.VARIABLE_LOAD
+                ? VariableOperation.Operation.LOAD
+                : VariableOperation.Operation.STORE;
+        return new VariableOperation(op, token.value(), context);
+    }
+
+    private VariableDeclaration parseLet() {
+        var variableInfo = next();
+        if (variableInfo.tokenType() != TokenType.FUNCTION_INVOCATION) {
+            throw new RuntimeException("Unrecognized token: " + variableInfo.value());
+        }
+
+        var info = variableInfo.value();
+        var pieces = info.split(":");
+        if (pieces.length != 2) {
+            throw new RuntimeException("Incorrect variable info: " + info);
+        }
+
+        var name = pieces[0];
+        var type = pieces[1];
+
+        if (!ShumDataType.contains(type)) {
+            throw new RuntimeException("Unknown type: " + type);
+        }
+
+        return new VariableDeclaration(name, ShumDataType.getDataType(type));
     }
 
     private LoopStatement parseLoopStatement() {
@@ -105,13 +138,14 @@ public class Parser {
         return new MacroDeclaration(name, macroInstructions);
     }
 
-    private Instruction parseCallableBodyInstruction(Token instrToken) {
-        return switch (instrToken.tokenType()) {
-            case VALUE -> parseValue(instrToken);
+    private Instruction parseCallableBodyInstruction(Token token) {
+        return switch (token.tokenType()) {
+            case VALUE -> parseValue(token);
             case IF -> parseIfStatement();
             case LOOP -> parseLoopStatement();
-            case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(instrToken.value(), context);
-            default -> throw new IllegalStateException("Unexpected token: " + instrToken.tokenType());
+            case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(token.value(), context);
+            case VARIABLE_LOAD, VARIABLE_STORE -> parseVariableOp(token);
+            default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
         };
     }
 

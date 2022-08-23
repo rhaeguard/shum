@@ -1,14 +1,11 @@
 package io.shum.asm.instructions;
 
+import io.shum.language.ShumDataType;
 import org.objectweb.asm.MethodVisitor;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.IntStream.range;
 
 public final class FunctionDeclaration implements Instruction {
 
@@ -45,30 +42,10 @@ public final class FunctionDeclaration implements Instruction {
     }
 
     private String createMethodDescriptor() {
-        Map<String, String> KNOWN_TYPES = new HashMap<>();
-        KNOWN_TYPES.put("int", "Ljava/lang/Long;");
-        KNOWN_TYPES.put("double", "Ljava/lang/Double;");
-        KNOWN_TYPES.put("string", "Ljava/lang/String;");
-
-        final String returnType;
-
-        if (returns) {
-            returnType = KNOWN_TYPES.get(returnTypes.get(0));
-            if (returnType == null) {
-                throw new RuntimeException("Unknown return type : " + returnTypes.get(0));
-            }
-        } else {
-            returnType = "V";
-        }
+        var returnType = returns ? ShumDataType.getDataType(returnTypes.get(0)).jvmType : "V";
 
         var params = parameters.stream()
-                .map(p -> {
-                    var jvmType = KNOWN_TYPES.get(p);
-                    if (jvmType == null) {
-                        throw new RuntimeException("Unknown parameter type : " + p);
-                    }
-                    return jvmType;
-                })
+                .map(p -> ShumDataType.getDataType(p).jvmType)
                 .collect(joining());
 
         return String.format("(%s)%s", params, returnType);

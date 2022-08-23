@@ -34,4 +34,8 @@ public class Utils {
     public static boolean isSingleQuoted(String str) {
         return str.startsWith("'") && str.endsWith("'");
     }
+
+    public static boolean isQuotedString(String str) {
+        return isSingleQuoted(str) || isDoubleQuoted(str);
+    }
 }

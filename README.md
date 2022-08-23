@@ -140,6 +140,35 @@ Syntax:
 end
 ```
 
+## Variables
+
+Currently, shum supports global variables.
+
+Syntax to declare a variable:
+
+```
+let [varName]:[dataType]
+```
+
+When a GLOBAL variable is declared, the initial value is `null`. There are two operations we can do with a variable:
+
+- `varName@` - loads the value of the variable onto the stack
+- `varName!` - binds the value at the top of the stack to the variable with the given name
+
+The syntax for variable operations is taken from Forth.
+
+For example, to sum numbers from 1 till 15, we can do:
+
+```
+let sum:int                 // define a variable called `sum` which is an integer
+0 sum!                      // initialize the variable to 0
+1 loop dup 15 <= do         // loop till 15
+     dup sum@ + sum!        // sum the loop increment with the sum value, and save it back to sum
+     1 +                    // increment to advance the loop pointer
+end
+sum@ print                  // print the result which should be 120
+```
+
 ## Custom functions
 
 We can use the `func` keyword to create functions. Function declarations must end with `end` keyword.

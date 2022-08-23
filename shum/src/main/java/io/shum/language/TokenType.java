@@ -19,7 +19,9 @@ public enum TokenType {
     ELSE("else", true),
     LOOP("loop", true),
     DO("do", true),
-    BREAK("break", true);
+    BREAK("break", true),
+    LET("let", true),
+    VARIABLE_LOAD, VARIABLE_STORE;
 
     public final String representation;
     public final boolean isKeyword;
@@ -31,6 +33,14 @@ public enum TokenType {
     TokenType(String representation, boolean isKeyword) {
         this.representation = representation;
         this.isKeyword = isKeyword;
+    }
+
+    public static boolean isKnownKeyword(String token) {
+        return KNOWN_KEYWORDS.containsKey(token);
+    }
+
+    public static TokenType getKeyword(String token) {
+        return KNOWN_KEYWORDS.get(token);
     }
 
     public static final Map<String, TokenType> KNOWN_KEYWORDS =

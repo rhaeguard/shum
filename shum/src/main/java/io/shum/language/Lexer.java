@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static io.shum.language.TokenType.isKnownKeyword;
+import static io.shum.language.Utils.isFloatingPoint;
+import static io.shum.language.Utils.isQuotedString;
+
 public class Lexer {
 
     private final File file;
@@ -18,15 +22,15 @@ public class Lexer {
     }
 
     private Token convertTokenToInstruction(String token) {
-        if (token.startsWith("\"") && token.endsWith("\"") || token.startsWith("'") && token.endsWith("'")) {
-            return new Token(token, TokenType.VALUE);
-        }
-        if (Utils.isFloatingPoint(token)) {
-            return new Token(token, TokenType.VALUE);
-        }
+        if (isQuotedString(token)) return new Token(token, TokenType.VALUE);
+        if (isFloatingPoint(token)) return new Token(token, TokenType.VALUE);
+        if (isKnownKeyword(token)) return new Token(token, TokenType.getKeyword(token));
 
-        if (TokenType.KNOWN_KEYWORDS.containsKey(token)) {
-            return new Token(token, TokenType.KNOWN_KEYWORDS.get(token));
+        if (token.endsWith("@")) {
+            return new Token(token.substring(0, token.length() - 1), TokenType.VARIABLE_LOAD);
+        }
+        if (token.endsWith("!")) {
+            return new Token(token.substring(0, token.length() - 1), TokenType.VARIABLE_STORE);
         }
 
         return new Token(token, TokenType.FUNCTION_INVOCATION);
@@ -37,7 +41,7 @@ public class Lexer {
             return lines
                     .map(String::trim)
                     .map(line -> {
-                        var pieces = line.split("//");
+                        var pieces = line.split("//"); // ignore comments
                         if (pieces.length == 0) {
                             return null;
                         }

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static io.shum.Compiler.MAIN_CLASS_NAME;
 import static java.util.Map.entry;
 
 public final class UserDefinedFunctionCall implements FunctionCall {
@@ -38,7 +39,7 @@ public final class UserDefinedFunctionCall implements FunctionCall {
         if (maybeFD instanceof Maybe.Some<FunctionDeclaration> fd) {
             mv.visitMethodInsn(
                     INVOKESTATIC,
-                    "Main",
+                    MAIN_CLASS_NAME,
                     functionName,
                     fd.getValue().getDescriptor(),
                     false

@@ -1,12 +1,35 @@
-func sumTill int -> int = dup 1 + * 2 / end
-
-macro euler = 
-    333 sumTill 3 *
-    199 sumTill 5 *
-    +
-    66 sumTill 15 *
-    -
-    print
+// sum numbers from 1 - 10 using an auxiliary space
+let sum:int
+0 sum!
+1 loop dup 15 <= do
+     dup sum@ + sum!
+     1 +
 end
+sum@ print
 
-euler
+/////////////////////////////
+
+// let i:int
+// 0 i!
+//
+// loop i@ 10 < do
+//     i@ print
+//     1 i@ +
+//     i!
+// end
+
+/////////////////////////////
+
+// let sum:int
+// 0 sum!
+
+// func sumTill15 int -> int =
+//     1 loop dup 15 <= do
+//          dup sum@ + sum!
+//          1 +
+//     end
+//     sum@
+//     return
+// end
+
+// sumTill15 print

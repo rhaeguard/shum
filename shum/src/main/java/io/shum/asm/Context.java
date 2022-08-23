@@ -2,6 +2,7 @@ package io.shum.asm;
 
 import io.shum.asm.instructions.FunctionDeclaration;
 import io.shum.asm.instructions.MacroDeclaration;
+import io.shum.asm.instructions.VariableDeclaration;
 import io.shum.utils.Maybe;
 
 import java.util.HashMap;
@@ -11,10 +12,12 @@ public class Context {
 
     private final Map<String, FunctionDeclaration> declaredFunctions;
     private final Map<String, MacroDeclaration> declaredMacros;
+    private final Map<String, VariableDeclaration> declaredStaticVariables;
 
     public Context() {
         declaredFunctions = new HashMap<>();
         declaredMacros = new HashMap<>();
+        declaredStaticVariables = new HashMap<>();
     }
 
     public void createNewFunctionDeclaration(FunctionDeclaration fd) {
@@ -47,5 +50,16 @@ public class Context {
 
     public Maybe<MacroDeclaration> getMacroDeclaration(String macroName) {
         return Maybe.of(declaredMacros.get(macroName));
+    }
+
+    public void createNewStaticVariableDeclaration(VariableDeclaration vd) {
+        if (declaredStaticVariables.containsKey(vd.getName())){
+            throw new RuntimeException(String.format("Static variable '%s' has already been declared", vd.getName()));
+        }
+        declaredStaticVariables.put(vd.getName(), vd);
+    }
+
+    public Maybe<VariableDeclaration> getVariableDeclaration(String varName) {
+        return Maybe.of(declaredStaticVariables.get(varName));
     }
 }

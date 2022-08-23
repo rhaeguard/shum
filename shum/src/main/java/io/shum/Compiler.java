@@ -22,7 +22,7 @@ public class Compiler {
     }
 
     public void compile(boolean shouldRun) {
-        var classGenerator = new ClassGenerator("Main");
+        var classGenerator = new ClassGenerator(MAIN_CLASS_NAME);
         classGenerator.generate(instructions);
         classGenerator.saveToFile();
         if (shouldRun) {
@@ -79,10 +79,15 @@ public class Compiler {
 
         var file = new File(filename);
         var tokens = new Lexer(file).lex();
+        for (Token token : tokens) {
+            System.out.println(token);
+        }
         var instructions = new Parser(tokens, new Context()).parse();
 
         new Compiler(instructions)
                 .debugInstructions(debugInstructions)
                 .compile(shouldRun);
     }
+
+    public static final String MAIN_CLASS_NAME = "Main";
 }
