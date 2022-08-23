@@ -1,35 +1,37 @@
-// sum numbers from 1 - 10 using an auxiliary space
+let start:int
+3 start!
+
 let sum:int
 0 sum!
-1 loop dup 15 <= do
-     dup sum@ + sum!
-     1 +
+
+loop start@ 1000 < do
+    start@ 5 % 0 ==
+    start@ 3 % 0 ==
+    or if
+        start@ sum@ + sum!
+    else end
+    start@ 1 + start!
 end
+
 sum@ print
 
-/////////////////////////////
+func sumTill int -> int =
+    let till:int
+    till            // take the value of the first parameter since it is pushed onto the stack
 
-// let i:int
-// 0 i!
-//
-// loop i@ 10 < do
-//     i@ print
-//     1 i@ +
-//     i!
-// end
+    let counter:int
+    0 counter!
 
-/////////////////////////////
+    let sum:int
+    0 sum!
 
-// let sum:int
-// 0 sum!
+    loop counter@ till@ <= do
+        counter@ sum@ + sum!
+        counter@ 1 + counter!
+    end
 
-// func sumTill15 int -> int =
-//     1 loop dup 15 <= do
-//          dup sum@ + sum!
-//          1 +
-//     end
-//     sum@
-//     return
-// end
+    sum@
+    return
+end
 
-// sumTill15 print
+15 sumTill print

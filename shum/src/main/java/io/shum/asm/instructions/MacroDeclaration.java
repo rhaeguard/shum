@@ -14,6 +14,10 @@ public final class MacroDeclaration implements Instruction {
         this.instructions = instructions;
     }
 
+    public List<Instruction> getInstructions() {
+        return instructions;
+    }
+
     @Override
     public void apply(MethodVisitor mv) {
         for (var instruction : instructions) {

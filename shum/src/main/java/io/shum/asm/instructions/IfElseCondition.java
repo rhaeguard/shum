@@ -13,6 +13,14 @@ public final class IfElseCondition implements Instruction {
         this.falseBranch = falseBranch;
     }
 
+    public MacroDeclaration getTrueBranch() {
+        return trueBranch;
+    }
+
+    public MacroDeclaration getFalseBranch() {
+        return falseBranch;
+    }
+
     @Override
     public void apply(MethodVisitor mv) {
         var trueLabel = new Label();

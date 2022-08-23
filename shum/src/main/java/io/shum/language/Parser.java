@@ -44,7 +44,7 @@ public class Parser {
 
             var parsedInstruction = switch (token.tokenType()) {
                 case MACRO -> parseMacroDeclaration();
-                case FUNC -> processFuncDeclaration();
+                case FUNC -> parseFuncDeclaration();
                 case IF -> parseIfStatement();
                 case LOOP -> parseLoopStatement();
                 case VALUE -> parseValue(token);
@@ -144,12 +144,13 @@ public class Parser {
             case IF -> parseIfStatement();
             case LOOP -> parseLoopStatement();
             case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(token.value(), context);
+            case LET -> parseLet();
             case VARIABLE_LOAD, VARIABLE_STORE -> parseVariableOp(token);
             default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
         };
     }
 
-    private FunctionDeclaration processFuncDeclaration() {
+    private FunctionDeclaration parseFuncDeclaration() {
         var name = parseFunctionName();
         var sig = parseFunctionSignature();
 
@@ -162,10 +163,26 @@ public class Parser {
             }
             var instruction = parseCallableBodyInstruction(instrToken);
 
+            injectFunctionInformationIntoVariableOperations(name, instruction);
+
             functionInstructions.add(instruction);
             instrToken = next();
         }
         return new FunctionDeclaration(name, sig, functionInstructions);
+    }
+
+    private void injectFunctionInformationIntoVariableOperations(String functionName, Instruction instruction) {
+        if (instruction instanceof VariableOperation vo) {
+            vo.withFunction(functionName);
+        } else if (instruction instanceof LoopStatement ls) {
+            injectFunctionInformationIntoVariableOperations(functionName, ls.getCondition());
+            injectFunctionInformationIntoVariableOperations(functionName, ls.getBody());
+        } else if (instruction instanceof IfElseCondition ic) {
+            injectFunctionInformationIntoVariableOperations(functionName, ic.getTrueBranch());
+            injectFunctionInformationIntoVariableOperations(functionName, ic.getFalseBranch());
+        } else if (instruction instanceof MacroDeclaration md) {
+            md.getInstructions().forEach(i -> injectFunctionInformationIntoVariableOperations(functionName, i));
+        }
     }
 
     private FunctionDeclaration.FunctionSignature parseFunctionSignature() {

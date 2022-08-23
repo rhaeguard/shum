@@ -12,6 +12,14 @@ public final class LoopStatement implements Instruction {
         this.body = body;
     }
 
+    public MacroDeclaration getCondition() {
+        return condition;
+    }
+
+    public MacroDeclaration getBody() {
+        return body;
+    }
+
     @Override
     public void apply(MethodVisitor mv) {
         var conditionLabel = new Label();

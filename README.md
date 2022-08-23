@@ -142,15 +142,13 @@ end
 
 ## Variables
 
-Currently, shum supports global variables.
-
 Syntax to declare a variable:
 
 ```
 let [varName]:[dataType]
 ```
 
-When a GLOBAL variable is declared, the initial value is `null`. There are two operations we can do with a variable:
+When a variable is declared, the initial value is `null`. There are two operations we can do with a variable:
 
 - `varName@` - loads the value of the variable onto the stack
 - `varName!` - binds the value at the top of the stack to the variable with the given name
@@ -167,6 +165,30 @@ let sum:int                 // define a variable called `sum` which is an intege
      1 +                    // increment to advance the loop pointer
 end
 sum@ print                  // print the result which should be 120
+```
+
+Variables defined outside of any function are global, and the ones declared inside of a function are local. Global and local variables can have the same name, and in that case, the local variable will shadow the global one for that function. **Local variables can only be created inside of the main body of the function!** 
+
+A little bit of an exaggerated example of a function using local variables.
+```
+func sumTill int -> int =
+    let till:int
+    till            // take the value of the first parameter since it is pushed onto the stack
+
+    let counter:int
+    0 counter!
+
+    let sum:int
+    0 sum!
+
+    loop counter@ till@ <= do
+        counter@ sum@ + sum!
+        counter@ 1 + counter!
+    end
+
+    sum@
+    return
+end
 ```
 
 ## Custom functions

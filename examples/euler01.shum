@@ -3,6 +3,9 @@
 // Find the sum of all the multiples of 3 or 5 below 1000.
 // Link: https://projecteuler.net/problem=1
 
+////////////////////////////////////////////////////
+/// PURE STACK BASED SOLUTION
+////////////////////////////////////////////////////
 0 // sum 
 3 // starting from
 loop dup 1000 < do
@@ -22,6 +25,26 @@ loop dup 1000 < do
 end 
 drop    // drop the number which is 1000
 print   // print the sum
+
+////////////////////////////////////////////////////
+/// USING VARIABLES
+////////////////////////////////////////////////////
+let start:int
+3 start!
+
+let sum:int
+0 sum!
+
+loop start@ 1000 < do
+    start@ 5 % 0 ==
+    start@ 3 % 0 ==
+    or if
+        start@ sum@ + sum!
+    else end
+    start@ 1 + start!
+end
+
+sum@ print
 
 ////////////////////////////////////////////////////
 /// MATH solution

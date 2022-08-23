@@ -79,9 +79,9 @@ public class Compiler {
 
         var file = new File(filename);
         var tokens = new Lexer(file).lex();
-        for (Token token : tokens) {
-            System.out.println(token);
-        }
+//        for (Token token : tokens) {
+//            System.out.println(token);
+//        }
         var instructions = new Parser(tokens, new Context()).parse();
 
         new Compiler(instructions)

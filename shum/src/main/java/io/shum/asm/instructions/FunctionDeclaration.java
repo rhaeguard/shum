@@ -1,9 +1,12 @@
 package io.shum.asm.instructions;
 
 import io.shum.language.ShumDataType;
+import io.shum.utils.Maybe;
 import org.objectweb.asm.MethodVisitor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.joining;
 
@@ -16,15 +19,23 @@ public final class FunctionDeclaration implements Instruction {
     private final List<String> returnTypes;
     private final String descriptor;
     private final List<Instruction> instructions;
+    private final Map<String, VariableDeclaration> localVariables = new HashMap<>();
 
     public FunctionDeclaration(String name, FunctionSignature signature, List<Instruction> instructions) {
         this.name = name;
         this.parameterCount = signature.parameters.size();
         this.parameters = signature.parameters;
-        this.instructions = instructions;
+        this.instructions = instructions.stream().filter(ins -> !(ins instanceof VariableDeclaration)).toList();
         this.returns = !signature.returnTypes.isEmpty();
         this.returnTypes = signature.returnTypes;
         this.descriptor = createMethodDescriptor();
+
+        int localVariableIndex = this.parameterCount;
+        for (var ins : instructions) {
+            if (ins instanceof VariableDeclaration vd) {
+                localVariables.put(vd.getName(), vd.withIndex(localVariableIndex++));
+            }
+        }
     }
 
     @Override
@@ -35,6 +46,14 @@ public final class FunctionDeclaration implements Instruction {
 
     public String getName() {
         return name;
+    }
+
+    public List<VariableDeclaration> getVariables() {
+        return this.localVariables.values().stream().toList();
+    }
+
+    public Maybe<VariableDeclaration> getVariable(String name) {
+        return Maybe.of(localVariables.get(name));
     }
 
     public List<Instruction> getInstructions() {

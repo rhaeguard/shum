@@ -2,6 +2,8 @@ package io.shum.asm.generation;
 
 import io.shum.asm.instructions.FunctionDeclaration;
 import io.shum.asm.instructions.Instruction;
+import io.shum.asm.instructions.VariableDeclaration;
+import io.shum.asm.instructions.VariableOperation;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.commons.LocalVariablesSorter;
 
@@ -45,6 +47,11 @@ public class MethodGenerator {
 
         for (int i = 0; i < fd.getParameterCount(); i++) {
             mv.visitVarInsn(ALOAD, i);
+        }
+
+        for (var variable : fd.getVariables()) {
+            mv.visitInsn(ACONST_NULL);
+            mv.visitVarInsn(ASTORE, variable.getLocalVariableIndex());
         }
 
         for (var instruction : fd.getInstructions()) {
