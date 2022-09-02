@@ -1,0 +1,12 @@
+// declare a list of some elements
+let nums:list
+// initialize the list
+[1 2 3 4 5] nums!
+
+// print the elements
+macro printNums = nums@ print end
+
+printNums
+
+// adding an element to the end of the list
+nums@ 6 add

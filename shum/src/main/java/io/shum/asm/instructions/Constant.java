@@ -13,6 +13,10 @@ public final class Constant implements Instruction {
         this.value = value;
     }
 
+    public ShumDataType getDataType() {
+        return dataType;
+    }
+
     @Override
     public void apply(MethodVisitor mv) {
         switch (dataType) {
@@ -30,6 +34,6 @@ public final class Constant implements Instruction {
 
     @Override
     public String toString() {
-        return String.format("Constant(%s, %s)", dataType, value);
+        return String.format("%s(%s)", dataType, value);
     }
 }

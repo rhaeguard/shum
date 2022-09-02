@@ -110,7 +110,7 @@ public final class StringFunction implements BuiltInFunctionCall {
             }
         }
 
-        record ExistingJavaMethod(String originalFunctionName,
+        private record ExistingJavaMethod(String originalFunctionName,
                                   String functionDescriptor,
                                   Consumer<MethodVisitor> preprocess,
                                   Consumer<MethodVisitor> postprocess) {

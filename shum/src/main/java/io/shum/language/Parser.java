@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toSet;
 
 public class Parser {
 
@@ -51,6 +52,7 @@ public class Parser {
                 case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(token.value(), context);
                 case LET -> parseLet();
                 case VARIABLE_LOAD, VARIABLE_STORE -> parseVariableOp(token);
+                case LIST_NOTATION, SET_NOTATION, DICT_NOTATION -> parseCollectionNotation(token);
                 default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
             };
 
@@ -67,6 +69,34 @@ public class Parser {
         }
 
         return this.instructions;
+    }
+
+    private CollectionValue parseCollectionNotation(Token token) {
+        var notationType = token.tokenType();
+        var value = token.value();
+        var elementTokens = new Lexer(null).lex(value);
+
+        // everything must be a constant!
+        if (elementTokens.stream().anyMatch(e -> e.tokenType() != TokenType.VALUE)) {
+            throw new RuntimeException("Collection values must be constants!");
+        }
+
+        var elements = elementTokens.stream().map(this::parseValue).toList();
+
+        // everything must be of the same type
+        if (elements.stream().map(Constant::getDataType).collect(toSet()).size() != 1) {
+            throw new RuntimeException("Collection values must be of the same type!");
+        }
+        var elementDataType = elements.stream().map(Constant::getDataType).reduce((a, b) -> a).get();
+
+        var dataType = switch (notationType) {
+            case LIST_NOTATION -> CollectionValue.CollectionType.LIST;
+            case SET_NOTATION -> CollectionValue.CollectionType.SET;
+            case DICT_NOTATION -> CollectionValue.CollectionType.DICT;
+            default -> throw new RuntimeException("Unsupported collection data type: " + token.value());
+        };
+
+        return new CollectionValue(dataType, elementDataType, elements);
     }
 
     private VariableOperation parseVariableOp(Token token) {
@@ -91,11 +121,8 @@ public class Parser {
         var name = pieces[0];
         var type = pieces[1];
 
-        if (!ShumDataType.contains(type)) {
-            throw new RuntimeException("Unknown type: " + type);
-        }
-
-        return new VariableDeclaration(name, ShumDataType.getDataType(type));
+        var dataType = ShumDataType.getDataType(type);
+        return new VariableDeclaration(name, dataType);
     }
 
     private LoopStatement parseLoopStatement() {
@@ -146,6 +173,7 @@ public class Parser {
             case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(token.value(), context);
             case LET -> parseLet();
             case VARIABLE_LOAD, VARIABLE_STORE -> parseVariableOp(token);
+            case LIST_NOTATION -> parseCollectionNotation(token);
             default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
         };
     }

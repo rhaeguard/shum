@@ -18,7 +18,9 @@ final public class CastingInstructions implements Opcodes {
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Long", "intValue", "()I", false);
     };
 
-    public final static Consumer<MethodVisitor> NOTHING = mv -> {};
 
     public final static Consumer<MethodVisitor> BOOL_OBJECT_BOOL_PRIMITIVE = mv -> mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
+
+    public final static Consumer<MethodVisitor> NOTHING = mv -> {};
+    public final static Consumer<MethodVisitor> POP_TOP = mv -> mv.visitInsn(Opcodes.POP);
 }

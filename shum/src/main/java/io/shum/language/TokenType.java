@@ -21,7 +21,8 @@ public enum TokenType {
     DO("do", true),
     BREAK("break", true),
     LET("let", true),
-    VARIABLE_LOAD, VARIABLE_STORE;
+    VARIABLE_LOAD, VARIABLE_STORE,
+    LIST_NOTATION, SET_NOTATION, DICT_NOTATION;
 
     public final String representation;
     public final boolean isKeyword;

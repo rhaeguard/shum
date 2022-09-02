@@ -33,6 +33,7 @@ public final class VariableOperation implements Instruction {
                 mv.visitFieldInsn(GETSTATIC, Compiler.MAIN_CLASS_NAME, name, vd.getDataType().jvmType);
             } else if (operation == Operation.STORE) {
                 // assuming that there already exists an appropriate value at the top of the stack
+                mv.visitTypeInsn(CHECKCAST, vd.getDataType().getClassName());
                 mv.visitFieldInsn(PUTSTATIC, Compiler.MAIN_CLASS_NAME, name, vd.getDataType().jvmType);
             } else {
                 throw new RuntimeException("Unsupported operation: " + operation);
@@ -61,6 +62,7 @@ public final class VariableOperation implements Instruction {
         if (operation == Operation.LOAD) {
             mv.visitVarInsn(ALOAD, localIndex);
         } else if (operation == Operation.STORE) {
+            mv.visitTypeInsn(CHECKCAST, vd.getDataType().getClassName());
             mv.visitVarInsn(ASTORE, localIndex);
         } else {
             throw new RuntimeException("Unsupported operation: " + operation);

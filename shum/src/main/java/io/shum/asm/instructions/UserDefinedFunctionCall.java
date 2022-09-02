@@ -48,6 +48,8 @@ public final class UserDefinedFunctionCall implements FunctionCall {
             var maybeMD = context.getMacroDeclaration(functionName);
             if (maybeMD instanceof Maybe.Some<MacroDeclaration> md) {
                 md.getValue().apply(mv);
+            } else {
+                throw new RuntimeException("There is no function or macro available with the name: "+ functionName);
             }
         }
 
@@ -89,6 +91,7 @@ public final class UserDefinedFunctionCall implements FunctionCall {
         allFunc.putAll(StringFunction.getAllSupportedJavaStringOperations());
         allFunc.putAll(DupFunction.getAllDupOperations());
         allFunc.putAll(LogicalFunction.getAllLogicalOperators());
+        allFunc.putAll(CollectionFunction.getAllCollectionFunctions());
         return allFunc;
     }
 

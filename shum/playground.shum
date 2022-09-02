@@ -1,37 +1,26 @@
-let start:int
-3 start!
+let nums:list
+[1 2 3 4 3] nums!
 
-let sum:int
-0 sum!
+macro printNums = nums@ print end
 
-loop start@ 1000 < do
-    start@ 5 % 0 ==
-    start@ 3 % 0 ==
-    or if
-        start@ sum@ + sum!
-    else end
-    start@ 1 + start!
-end
+printNums
+nums@ 7 add
+// nums@ size 4 + print
+// nums@ 5 get print
 
-sum@ print
+// printNums
+nums@ 3 deleteElement
+printNums
+nums@ 3 deleteAtPos
+printNums
 
-func sumTill int -> int =
-    let till:int
-    till!            // take the value of the first parameter since it is pushed onto the stack
+nums@ [7 8 9] add
+printNums
 
-    let counter:int
-    0 counter!
+// nums@ nums@ size 1 - get "hello" add
+// printNums
 
-    let sum:int
-    0 sum!
-
-    loop counter@ till@ <= do
-        counter@ sum@ + sum!
-        counter@ 1 + counter!
-    end
-
-    sum@
-    return
-end
-
-15 sumTill print
+//
+// nums@ print
+// nums@2 print    // prints: 3
+// nums@ 2 get print

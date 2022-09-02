@@ -3,10 +3,7 @@ package io.shum.language;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static io.shum.language.TokenType.isKnownKeyword;
@@ -33,32 +30,50 @@ public class Lexer {
             return new Token(token.substring(0, token.length() - 1), TokenType.VARIABLE_STORE);
         }
 
+        if (token.startsWith("[") && token.endsWith("]")) {
+            return new Token(token.substring(1, token.length() - 1), TokenType.LIST_NOTATION);
+        } else if (token.startsWith("(") && token.endsWith(")")) {
+            return new Token(token.substring(1, token.length() - 1), TokenType.SET_NOTATION);
+        } else if (token.startsWith("{") && token.endsWith("}")) {
+            return new Token(token.substring(1, token.length() - 1), TokenType.DICT_NOTATION);
+        }
+
         return new Token(token, TokenType.FUNCTION_INVOCATION);
     }
 
     public List<Token> lex() {
-        try (Stream<String> lines = Files.lines(file.toPath())) {
-            return lines
-                    .map(String::trim)
-                    .map(line -> {
-                        var pieces = line.split("//"); // ignore comments
-                        if (pieces.length == 0) {
-                            return null;
-                        }
-                        return pieces[0];
-                    })
-                    .filter(Objects::nonNull)
-                    .map(Lexer::shellSplit)
-                    .flatMap(Collection::stream)
-                    .map(this::convertTokenToInstruction)
-                    .toList();
+        try (var lines = Files.lines(file.toPath())) {
+            return lexLines(lines);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    public List<Token> lex(String input) {
+        try (var lines = Arrays.stream(input.split(System.lineSeparator()))) {
+            return lexLines(lines);
+        }
+    }
+
+    private List<Token> lexLines(Stream<String> lines) {
+        return lines
+                .map(String::trim)
+                .map(line -> {
+                    var pieces = line.split("//"); // ignore comments
+                    if (pieces.length == 0) {
+                        return null;
+                    }
+                    return pieces[0];
+                })
+                .filter(Objects::nonNull)
+                .map(Lexer::shellSplit)
+                .flatMap(Collection::stream)
+                .map(this::convertTokenToInstruction)
+                .toList();
+    }
+
     // Reference: https://gist.github.com/raymyers/8077031
-    private static List<String> shellSplit(CharSequence string) {
+    static List<String> shellSplit(CharSequence string) {
         var tokens = new ArrayList<String>();
 
         boolean escaping = false;
@@ -75,11 +90,11 @@ public class Lexer {
                 escaping = false;
             } else if (c == '\\' && !(quoting && quoteChar == '\'')) {
                 escaping = true;
-            } else if (quoting && c == quoteChar) {
+            } else if (quoting && (c == quoteChar || (c == ']' || c == ')'))) {
                 quoting = false;
                 lastCloseQuoteIndex = i;
                 current.append(c);
-            } else if (!quoting && (c == '\'' || c == '"')) {
+            } else if (!quoting && (c == '\'' || c == '"' || c == '[' || c == '(')) {
                 quoting = true;
                 quoteChar = c;
                 current.append(c);
