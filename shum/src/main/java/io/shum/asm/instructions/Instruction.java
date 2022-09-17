@@ -5,7 +5,7 @@ import org.objectweb.asm.Opcodes;
 
 public sealed interface Instruction
         extends Opcodes
-        permits Constant, FunctionCall, FunctionDeclaration, IfElseCondition, LoopStatement, MacroDeclaration, VariableDeclaration, VariableOperation {
+        permits Constant, FunctionCall, FunctionDeclaration, IfElseCondition, CollectionValue, LoopStatement, MacroDeclaration, VariableDeclaration, VariableOperation {
     void apply(MethodVisitor mv);
 
 }

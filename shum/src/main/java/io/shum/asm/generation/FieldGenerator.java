@@ -16,7 +16,7 @@ public class FieldGenerator {
     public void generate(VariableDeclaration vd) {
         int access = ACC_PUBLIC + ACC_STATIC;
         var name = vd.getName();
-        var type = vd.getDataType().jvmType;
+        var type = vd.getDataType().getTopLevelDataType().jvmType;
         final var fv = cw.visitField(
                 access,
                 name,

@@ -1,6 +1,6 @@
 package io.shum.asm.instructions;
 
-import io.shum.language.ShumDataType;
+import io.shum.language.type.ShumDataType;
 import io.shum.utils.Maybe;
 import org.objectweb.asm.MethodVisitor;
 
@@ -61,10 +61,10 @@ public final class FunctionDeclaration implements Instruction {
     }
 
     private String createMethodDescriptor() {
-        var returnType = returns ? ShumDataType.getDataType(returnTypes.get(0)).jvmType : "V";
+        var returnType = returns ? ShumDataType.getDataType(returnTypes.get(0)).getTopLevelDataType().jvmType : "V";
 
         var params = parameters.stream()
-                .map(p -> ShumDataType.getDataType(p).jvmType)
+                .map(p -> ShumDataType.getDataType(p).getTopLevelDataType().jvmType)
                 .collect(joining());
 
         return String.format("(%s)%s", params, returnType);

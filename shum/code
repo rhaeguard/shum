@@ -1,0 +1,166 @@
+Classfile /home/owary/Programming/FunProjects/shum/shum/Main.class
+  Last modified Sep. 17, 2022; size 968 bytes
+  MD5 checksum bd6d0a4994e6389d38b8d209e9d2159b
+public class Main
+  minor version: 0
+  major version: 52
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #2                          // Main
+  super_class: #4                         // java/lang/Object
+  interfaces: 0, fields: 1, methods: 1, attributes: 0
+Constant pool:
+   #1 = Utf8               Main
+   #2 = Class              #1             // Main
+   #3 = Utf8               java/lang/Object
+   #4 = Class              #3             // java/lang/Object
+   #5 = Utf8               emptyList
+   #6 = Utf8               Ljava/util/List;
+   #7 = Utf8               main
+   #8 = Utf8               ([Ljava/lang/String;)V
+   #9 = Utf8               java/util/ArrayList
+  #10 = Class              #9             // java/util/ArrayList
+  #11 = Utf8               <init>
+  #12 = Utf8               ()V
+  #13 = NameAndType        #11:#12        // "<init>":()V
+  #14 = Methodref          #10.#13        // java/util/ArrayList."<init>":()V
+  #15 = Long               1l
+  #17 = Utf8               java/lang/Long
+  #18 = Class              #17            // java/lang/Long
+  #19 = Utf8               valueOf
+  #20 = Utf8               (J)Ljava/lang/Long;
+  #21 = NameAndType        #19:#20        // valueOf:(J)Ljava/lang/Long;
+  #22 = Methodref          #18.#21        // java/lang/Long.valueOf:(J)Ljava/lang/Long;
+  #23 = Utf8               java/util/List
+  #24 = Class              #23            // java/util/List
+  #25 = Utf8               add
+  #26 = Utf8               (Ljava/lang/Object;)Z
+  #27 = NameAndType        #25:#26        // add:(Ljava/lang/Object;)Z
+  #28 = InterfaceMethodref #24.#27        // java/util/List.add:(Ljava/lang/Object;)Z
+  #29 = Long               2l
+  #31 = Long               3l
+  #33 = NameAndType        #5:#6          // emptyList:Ljava/util/List;
+  #34 = Fieldref           #2.#33         // Main.emptyList:Ljava/util/List;
+  #35 = Utf8               java/util/Collection
+  #36 = Class              #35            // java/util/Collection
+  #37 = Utf8               size
+  #38 = Utf8               ()I
+  #39 = NameAndType        #37:#38        // size:()I
+  #40 = InterfaceMethodref #36.#39        // java/util/Collection.size:()I
+  #41 = Long               0l
+  #43 = Utf8               longValue
+  #44 = Utf8               ()J
+  #45 = NameAndType        #43:#44        // longValue:()J
+  #46 = Methodref          #18.#45        // java/lang/Long.longValue:()J
+  #47 = Utf8               java/lang/Boolean
+  #48 = Class              #47            // java/lang/Boolean
+  #49 = Utf8               (Z)Ljava/lang/Boolean;
+  #50 = NameAndType        #19:#49        // valueOf:(Z)Ljava/lang/Boolean;
+  #51 = Methodref          #48.#50        // java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+  #52 = Utf8               java/lang/System
+  #53 = Class              #52            // java/lang/System
+  #54 = Utf8               out
+  #55 = Utf8               Ljava/io/PrintStream;
+  #56 = NameAndType        #54:#55        // out:Ljava/io/PrintStream;
+  #57 = Fieldref           #53.#56        // java/lang/System.out:Ljava/io/PrintStream;
+  #58 = Utf8               java/io/PrintStream
+  #59 = Class              #58            // java/io/PrintStream
+  #60 = Utf8               println
+  #61 = Utf8               (Ljava/lang/Object;)V
+  #62 = NameAndType        #60:#61        // println:(Ljava/lang/Object;)V
+  #63 = Methodref          #59.#62        // java/io/PrintStream.println:(Ljava/lang/Object;)V
+  #64 = Long               4l
+  #66 = InterfaceMethodref #36.#27        // java/util/Collection.add:(Ljava/lang/Object;)Z
+  #67 = Utf8               addAll
+  #68 = Utf8               (Ljava/util/Collection;)Z
+  #69 = NameAndType        #67:#68        // addAll:(Ljava/util/Collection;)Z
+  #70 = InterfaceMethodref #36.#69        // java/util/Collection.addAll:(Ljava/util/Collection;)Z
+  #71 = Utf8               [Ljava/lang/String;
+  #72 = Class              #71            // "[Ljava/lang/String;"
+  #73 = Utf8               Code
+  #74 = Utf8               StackMapTable
+{
+  public static java.util.List emptyList;
+    descriptor: Ljava/util/List;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+
+  public static void main(java.lang.String[]);
+    descriptor: ([Ljava/lang/String;)V
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=7, locals=2, args_size=1
+         0: new           #10                 // class java/util/ArrayList
+         3: dup
+         4: invokespecial #14                 // Method java/util/ArrayList."<init>":()V
+         7: astore_1
+         8: aload_1
+         9: ldc2_w        #15                 // long 1l
+        12: invokestatic  #22                 // Method java/lang/Long.valueOf:(J)Ljava/lang/Long;
+        15: invokeinterface #28,  2           // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+        20: pop
+        21: aload_1
+        22: ldc2_w        #29                 // long 2l
+        25: invokestatic  #22                 // Method java/lang/Long.valueOf:(J)Ljava/lang/Long;
+        28: invokeinterface #28,  2           // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+        33: pop
+        34: aload_1
+        35: ldc2_w        #31                 // long 3l
+        38: invokestatic  #22                 // Method java/lang/Long.valueOf:(J)Ljava/lang/Long;
+        41: invokeinterface #28,  2           // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+        46: pop
+        47: aload_1
+        48: checkcast     #24                 // class java/util/List
+        51: putstatic     #34                 // Field emptyList:Ljava/util/List;
+        54: getstatic     #34                 // Field emptyList:Ljava/util/List;
+        57: dup
+        58: invokeinterface #40,  1           // InterfaceMethod java/util/Collection.size:()I
+        63: i2l
+        64: invokestatic  #22                 // Method java/lang/Long.valueOf:(J)Ljava/lang/Long;
+        67: ldc2_w        #41                 // long 0l
+        70: invokestatic  #22                 // Method java/lang/Long.valueOf:(J)Ljava/lang/Long;
+        73: invokevirtual #46                 // Method java/lang/Long.longValue:()J
+        76: dup2_x1
+        77: pop2
+        78: invokevirtual #46                 // Method java/lang/Long.longValue:()J
+        81: dup2_x2
+        82: pop2
+        83: lcmp
+        84: ifne          91
+        87: iconst_0
+        88: goto          92
+        91: iconst_1
+        92: invokestatic  #51                 // Method java/lang/Boolean.valueOf:(Z)Ljava/lang/Boolean;
+        95: getstatic     #57                 // Field java/lang/System.out:Ljava/io/PrintStream;
+        98: swap
+        99: invokevirtual #63                 // Method java/io/PrintStream.println:(Ljava/lang/Object;)V
+       102: getstatic     #34                 // Field emptyList:Ljava/util/List;
+       105: ldc2_w        #64                 // long 4l
+       108: invokestatic  #22                 // Method java/lang/Long.valueOf:(J)Ljava/lang/Long;
+       111: dup
+       112: instanceof    #36                 // class java/util/Collection
+       115: ifne          126
+       118: invokeinterface #66,  2           // InterfaceMethod java/util/Collection.add:(Ljava/lang/Object;)Z
+       123: goto          131
+       126: invokeinterface #70,  2           // InterfaceMethod java/util/Collection.addAll:(Ljava/util/Collection;)Z
+       131: getstatic     #34                 // Field emptyList:Ljava/util/List;
+       134: getstatic     #57                 // Field java/lang/System.out:Ljava/io/PrintStream;
+       137: swap
+       138: invokevirtual #63                 // Method java/io/PrintStream.println:(Ljava/lang/Object;)V
+       141: return
+      StackMapTable: number_of_entries = 4
+        frame_type = 255 /* full_frame */
+          offset_delta = 91
+          locals = [ class "[Ljava/lang/String;", class java/util/ArrayList ]
+          stack = [ class java/util/List ]
+        frame_type = 255 /* full_frame */
+          offset_delta = 0
+          locals = [ class "[Ljava/lang/String;", class java/util/ArrayList ]
+          stack = [ class java/util/List, int ]
+        frame_type = 255 /* full_frame */
+          offset_delta = 33
+          locals = [ class "[Ljava/lang/String;", class java/util/ArrayList ]
+          stack = [ class java/util/List, class java/util/List, class java/lang/Long ]
+        frame_type = 255 /* full_frame */
+          offset_delta = 4
+          locals = [ class "[Ljava/lang/String;", class java/util/ArrayList ]
+          stack = [ class java/util/List, int ]
+}

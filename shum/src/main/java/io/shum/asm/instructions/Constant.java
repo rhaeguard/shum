@@ -1,6 +1,6 @@
 package io.shum.asm.instructions;
 
-import io.shum.language.ShumDataType;
+import io.shum.language.type.ShumDataType;
 import org.objectweb.asm.MethodVisitor;
 
 public final class Constant implements Instruction {
@@ -11,6 +11,10 @@ public final class Constant implements Instruction {
     public Constant(ShumDataType dataType, String value) {
         this.dataType = dataType;
         this.value = value;
+    }
+
+    public ShumDataType getDataType() {
+        return dataType;
     }
 
     @Override
@@ -30,6 +34,6 @@ public final class Constant implements Instruction {
 
     @Override
     public String toString() {
-        return String.format("Constant(%s, %s)", dataType, value);
+        return String.format("%s(%s)", dataType, value);
     }
 }

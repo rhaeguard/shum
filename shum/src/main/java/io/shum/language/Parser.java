@@ -2,6 +2,9 @@ package io.shum.language;
 
 import io.shum.asm.Context;
 import io.shum.asm.instructions.*;
+import io.shum.language.type.ContainerType;
+import io.shum.language.type.ShumDataType;
+import io.shum.language.type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +54,7 @@ public class Parser {
                 case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(token.value(), context);
                 case LET -> parseLet();
                 case VARIABLE_LOAD, VARIABLE_STORE -> parseVariableOp(token);
+                case LIST_NOTATION, SET_NOTATION, DICT_NOTATION -> parseCollectionNotation(token);
                 default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
             };
 
@@ -67,6 +71,29 @@ public class Parser {
         }
 
         return this.instructions;
+    }
+
+    private CollectionValue parseCollectionNotation(Token token) {
+        var notationType = token.tokenType();
+        var value = token.value();
+        var elementTokens = new Lexer(null).lex(value);
+
+        // everything must be a constant!
+        // todo: support VARIABLE_LOAD as well
+        if (elementTokens.stream().anyMatch(e -> e.tokenType() != TokenType.VALUE)) {
+            throw new RuntimeException("Collection values must be constants!");
+        }
+
+        var elements = elementTokens.stream().map(this::parseValue).toList();
+
+        var dataType = switch (notationType) {
+            case LIST_NOTATION -> ShumDataType.LIST;
+            case SET_NOTATION -> ShumDataType.SET;
+            case DICT_NOTATION -> ShumDataType.DICT;
+            default -> throw new RuntimeException("Unsupported collection data type: " + token.value());
+        };
+
+        return new CollectionValue(new ContainerType(dataType, Type.nothingType()), elements);
     }
 
     private VariableOperation parseVariableOp(Token token) {
@@ -91,11 +118,8 @@ public class Parser {
         var name = pieces[0];
         var type = pieces[1];
 
-        if (!ShumDataType.contains(type)) {
-            throw new RuntimeException("Unknown type: " + type);
-        }
-
-        return new VariableDeclaration(name, ShumDataType.getDataType(type));
+        var dataType = ShumDataType.getDataType(type);
+        return new VariableDeclaration(name, dataType);
     }
 
     private LoopStatement parseLoopStatement() {
@@ -146,6 +170,7 @@ public class Parser {
             case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(token.value(), context);
             case LET -> parseLet();
             case VARIABLE_LOAD, VARIABLE_STORE -> parseVariableOp(token);
+            case LIST_NOTATION -> parseCollectionNotation(token);
             default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
         };
     }
