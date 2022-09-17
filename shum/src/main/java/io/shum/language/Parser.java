@@ -2,13 +2,15 @@ package io.shum.language;
 
 import io.shum.asm.Context;
 import io.shum.asm.instructions.*;
+import io.shum.language.type.ContainerType;
+import io.shum.language.type.ShumDataType;
+import io.shum.language.type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toSet;
 
 public class Parser {
 
@@ -77,26 +79,21 @@ public class Parser {
         var elementTokens = new Lexer(null).lex(value);
 
         // everything must be a constant!
+        // todo: support VARIABLE_LOAD as well
         if (elementTokens.stream().anyMatch(e -> e.tokenType() != TokenType.VALUE)) {
             throw new RuntimeException("Collection values must be constants!");
         }
 
         var elements = elementTokens.stream().map(this::parseValue).toList();
 
-        // everything must be of the same type
-        if (elements.stream().map(Constant::getDataType).collect(toSet()).size() != 1) {
-            throw new RuntimeException("Collection values must be of the same type!");
-        }
-        var elementDataType = elements.stream().map(Constant::getDataType).reduce((a, b) -> a).get();
-
         var dataType = switch (notationType) {
-            case LIST_NOTATION -> CollectionValue.CollectionType.LIST;
-            case SET_NOTATION -> CollectionValue.CollectionType.SET;
-            case DICT_NOTATION -> CollectionValue.CollectionType.DICT;
+            case LIST_NOTATION -> ShumDataType.LIST;
+            case SET_NOTATION -> ShumDataType.SET;
+            case DICT_NOTATION -> ShumDataType.DICT;
             default -> throw new RuntimeException("Unsupported collection data type: " + token.value());
         };
 
-        return new CollectionValue(dataType, elementDataType, elements);
+        return new CollectionValue(new ContainerType(dataType, Type.nothingType()), elements);
     }
 
     private VariableOperation parseVariableOp(Token token) {

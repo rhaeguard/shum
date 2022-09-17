@@ -1,12 +1,94 @@
-// declare a list of some elements
-let nums:list
-// initialize the list
-[1 2 3 4 5] nums!
+// declare a list called 'nums'
+let nums:list[int]
+// initialize nums to the list below
+[1 2 3 4 3] nums!
 
-// print the elements
+// a macro for debugging purposes
+// it simply prints the whole list
 macro printNums = nums@ print end
 
-printNums
+printNums                   // print the whole list: expected: [1, 2, 3, 4, 3]
+nums@ 7 append              // append 7 to the list: expected: void
+printNums                   // should print: [1, 2, 3, 4, 3, 7]
 
-// adding an element to the end of the list
-nums@ 6 add
+nums@ size 4 + print        // get the size of the nums, and append 4 to the value and print: expected 10
+nums@ 5 get print           // get the fifth element of the nums, [0-based indexing]: expected 7
+
+nums@ 3 deleteElement       // delete first element with value 3 (in-place)
+printNums                   // [1, 2, 4, 3, 7]
+
+nums@ 2 deleteAtPos         // delete 2nd element of the nums list (in-place)
+printNums                   // [1, 2, 3, 7]
+
+nums@ [7 8 9] append        // append [7, 8, 9] to nums (in-place)
+printNums                   // [1, 2, 3, 7, 7, 8, 9]
+
+// a macro that gets the first element of the list
+macro first = dup 0 get end
+// a macro that gets the last element of the list
+macro last = dup dup size 1 - get end
+// a macro that checks if the list has elements
+macro hasElements = dup size 0 != end
+
+nums@ first print               // expected: 1
+nums@ last print                // expected: 9
+nums@ hasElements print         // expected: true
+
+let emptyList:list              
+[] emptyList!                   // create an empty list
+emptyList@ hasElements print    // check if it has elements
+emptyList@ 4 append             // append element
+emptyList@ print
+
+let aList:list                  
+[1 2 3 4 3] aList! 
+aList@ 2 "hello" set            // trying setting
+aList@ print                    // [1 2 hello 4 3]
+
+func printEach =
+    // we will iterate over this list
+    let localList:list
+    [1 2 3 4 5 "hello" 1.23] localList!
+
+    // current index
+    let i:int
+    0 i!
+
+    // size of the list
+    let len:int
+    localList@ size len!
+
+    // increment i by 1 each time and print the element at that index
+    loop i@ len@ < do
+        // loads the list -> loads the index -> calls get(List, ix) -> prints
+        localList@ i@ get print
+        // increments i
+        i@ 1 + i!
+    end
+end
+
+func printEachWithProvidedList list -> =
+    // capture the first param which is the collection/list
+    let localList:list
+    localList!
+
+    // current index
+    let i:int
+    0 i!
+
+    // size of the list
+    let len:int
+    localList@ size len!
+
+    // increment i by 1 each time and print the element at that index
+    loop i@ len@ < do
+        // loads the list -> loads the index -> calls get(List, ix) -> prints
+        localList@ i@ get print
+        // increments i
+        i@ 1 + i!
+    end
+end
+
+printEach
+"=====" print
+[1 2 3 4 5 "hello" 1.23] printEachWithProvidedList

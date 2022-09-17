@@ -1,6 +1,7 @@
 package io.shum.asm.instructions;
 
-import io.shum.language.ShumDataType;
+import io.shum.language.type.ContainerType;
+import io.shum.language.type.ShumDataType;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -8,23 +9,27 @@ import java.util.List;
 
 public final class CollectionValue implements Instruction {
 
-    public enum CollectionType {
-        LIST, SET, DICT
-    }
-
-    private final CollectionType type;
-    private final ShumDataType elementType;
+    private final ContainerType type;
     private final List<Constant> elements;
 
-    public CollectionValue(CollectionType type, ShumDataType elementType, List<Constant> elements) {
+    public CollectionValue(ContainerType type, List<Constant> elements) {
         this.type = type;
-        this.elementType = elementType;
+
+        if (type.elementType.getTopLevelDataType() != ShumDataType.NOTHING) {
+            var elementType = type.elementType.getTopLevelDataType();
+            for (Constant element : elements) {
+                if (element.getDataType() != elementType) {
+                    throw new RuntimeException("All the elements of the collection need to be of type: " + element.getDataType().name);
+                }
+            }
+        }
+
         this.elements = elements;
     }
 
     @Override
     public void apply(MethodVisitor mv) {
-        if (type == CollectionType.LIST) {
+        if (type.containerType == ShumDataType.LIST) {
             mv.visitTypeInsn(Opcodes.NEW, "java/util/ArrayList");
             mv.visitInsn(DUP);
             mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>", "()V", false);
@@ -36,7 +41,7 @@ public final class CollectionValue implements Instruction {
                 mv.visitInsn(POP);
             }
             mv.visitVarInsn(ALOAD, 1);
-        } else if (type == CollectionType.SET) {
+        } else if (type.containerType == ShumDataType.SET) {
             mv.visitTypeInsn(Opcodes.NEW, "java/util/HashSet");
             mv.visitInsn(DUP);
             mv.visitMethodInsn(INVOKESPECIAL, "java/util/HashSet", "<init>", "()V", false);
@@ -53,6 +58,6 @@ public final class CollectionValue implements Instruction {
 
     @Override
     public String toString() {
-        return String.format("%s[%s] = [%s]", type, elementType, elements.toString());
+        return String.format("%s = [%s]", type, elements.toString());
     }
 }

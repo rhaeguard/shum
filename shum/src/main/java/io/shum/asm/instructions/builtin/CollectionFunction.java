@@ -25,8 +25,9 @@ public final class CollectionFunction implements BuiltInFunctionCall {
 
     public static Map<String, Supplier<FunctionCall>> getAllCollectionFunctions() {
         return Map.ofEntries(
-                entry("add", () -> new CollectionFunction(Function.ADD)),
+                entry("append", () -> new CollectionFunction(Function.APPEND)),
                 entry("get", () -> new CollectionFunction(Function.LIST_GET)),
+                entry("set", () -> new CollectionFunction(Function.LIST_SET)),
                 entry("size", () -> new CollectionFunction(Function.SIZE)),
                 entry("deleteElement", () -> new CollectionFunction(Function.DELETE_ELEMENT)),
                 entry("deleteAtPos", () -> new CollectionFunction(Function.DELETE_AT))
@@ -38,7 +39,7 @@ public final class CollectionFunction implements BuiltInFunctionCall {
         SIZE("java/util/Collection", "size", "()I", NOTHING, INT_TO_LONG_OBJECT),
         DELETE_AT("java/util/List", "remove", "(I)Ljava/lang/Object;", LONG_OBJECT_TO_INT, POP_TOP),
         DELETE_ELEMENT("java/util/Collection", "remove", "(Ljava/lang/Object;)Z", NOTHING, POP_TOP),
-        ADD(mv -> {
+        APPEND(mv -> {
             var className = "java/util/Collection";
 
             mv.visitInsn(DUP);
@@ -52,6 +53,17 @@ public final class CollectionFunction implements BuiltInFunctionCall {
             mv.visitLabel(trueLabel);
             mv.visitMethodInsn(INVOKEINTERFACE, className, "addAll", "(Ljava/util/Collection;)Z", true);
             mv.visitLabel(endLabel);
+        }),
+        LIST_SET(mv -> {
+            // push index
+            // push element
+            mv.visitInsn(SWAP);
+            LONG_OBJECT_TO_INT.accept(mv);
+            mv.visitInsn(SWAP);
+            // set
+            mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "set", "(ILjava/lang/Object;)Ljava/lang/Object;", true);
+            // drop return
+            mv.visitInsn(POP);
         });
 
         private final ExistingJavaMethod existingJavaMethod;

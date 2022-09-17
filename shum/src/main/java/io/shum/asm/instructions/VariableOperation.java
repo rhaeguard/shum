@@ -2,6 +2,7 @@ package io.shum.asm.instructions;
 
 import io.shum.Compiler;
 import io.shum.asm.Context;
+import io.shum.language.type.ShumDataType;
 import io.shum.utils.Maybe;
 import org.objectweb.asm.MethodVisitor;
 
@@ -30,11 +31,11 @@ public final class VariableOperation implements Instruction {
         if (functionName == null) {
             var vd = getVariableDeclaration();
             if (operation == Operation.LOAD) {
-                mv.visitFieldInsn(GETSTATIC, Compiler.MAIN_CLASS_NAME, name, vd.getDataType().jvmType);
+                mv.visitFieldInsn(GETSTATIC, Compiler.MAIN_CLASS_NAME, name, vd.jvmType);
             } else if (operation == Operation.STORE) {
                 // assuming that there already exists an appropriate value at the top of the stack
-                mv.visitTypeInsn(CHECKCAST, vd.getDataType().getClassName());
-                mv.visitFieldInsn(PUTSTATIC, Compiler.MAIN_CLASS_NAME, name, vd.getDataType().jvmType);
+                mv.visitTypeInsn(CHECKCAST, vd.getClassName());
+                mv.visitFieldInsn(PUTSTATIC, Compiler.MAIN_CLASS_NAME, name, vd.jvmType);
             } else {
                 throw new RuntimeException("Unsupported operation: " + operation);
             }
@@ -62,17 +63,17 @@ public final class VariableOperation implements Instruction {
         if (operation == Operation.LOAD) {
             mv.visitVarInsn(ALOAD, localIndex);
         } else if (operation == Operation.STORE) {
-            mv.visitTypeInsn(CHECKCAST, vd.getDataType().getClassName());
+            mv.visitTypeInsn(CHECKCAST, vd.getDataType().getTopLevelDataType().getClassName());
             mv.visitVarInsn(ASTORE, localIndex);
         } else {
             throw new RuntimeException("Unsupported operation: " + operation);
         }
     }
 
-    private VariableDeclaration getVariableDeclaration() {
+    private ShumDataType getVariableDeclaration() {
         var maybeVD = context.getVariableDeclaration(name);
         if (maybeVD instanceof Maybe.Some<VariableDeclaration> svd) {
-            return svd.getValue();
+            return svd.getValue().getDataType().getTopLevelDataType();
         } else {
             throw new RuntimeException("Missing variable declaration info for: " + name);
         }

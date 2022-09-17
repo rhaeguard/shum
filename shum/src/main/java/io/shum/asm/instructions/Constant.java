@@ -1,6 +1,6 @@
 package io.shum.asm.instructions;
 
-import io.shum.language.ShumDataType;
+import io.shum.language.type.ShumDataType;
 import org.objectweb.asm.MethodVisitor;
 
 public final class Constant implements Instruction {

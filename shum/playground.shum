@@ -1,26 +1,3 @@
 let nums:list
-[1 2 3 4 3] nums!
-
-macro printNums = nums@ print end
-
-printNums
-nums@ 7 add
-// nums@ size 4 + print
-// nums@ 5 get print
-
-// printNums
-nums@ 3 deleteElement
-printNums
-nums@ 3 deleteAtPos
-printNums
-
-nums@ [7 8 9] add
-printNums
-
-// nums@ nums@ size 1 - get "hello" add
-// printNums
-
-//
-// nums@ print
-// nums@2 print    // prints: 3
-// nums@ 2 get print
+[1 2 3 4] nums!
+nums@ size print
