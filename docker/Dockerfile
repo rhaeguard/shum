@@ -23,10 +23,11 @@ ADD examples /lang/examples
 WORKDIR /lang/shumlang
 
 RUN mvn clean package
-RUN mv ./target/shum.jar /lang/
 
 WORKDIR /lang
-COPY ./docker/shum /lang/
-RUN chmod +x shum
+COPY ./docker/shum /lang/bin/
+RUN chmod +x /lang/bin/shum
+
+ENV PATH=/lang/bin:${PATH}
 
 CMD ["bash"]

@@ -10,8 +10,8 @@ Run the [build.sh](./build.sh) script. It creates the docker image and runs it. 
 
 You can try running example `shum` files as follows:
 ```
-bash>./shum ./examples/hello_world.shum
-bash>./shum ./examples/fibonacci.shum
+bash>shum ./examples/hello_world.shum
+bash>shum ./examples/fibonacci.shum
 ```
 
 Obviously, you can create your own files and run them in the same way.
