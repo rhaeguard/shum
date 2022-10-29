@@ -1,3 +1,47 @@
-let nums:list
-[1 2 3 4] nums!
-nums@ size print
+let PATTERNS:list
+[0 1 1 1 0 1 1 0] PATTERNS!
+
+let curr:list
+// 15 elements
+[1 0 0 0 0 0 0 0 0 0 0 0 0 0 1] curr!
+
+let next:list
+// 15 elements
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] next!
+
+let i:int
+let a:int
+let b:int
+let c:int
+let ix:int
+let temp:list
+let j:int
+
+0 i!
+loop i@ 15 < do
+
+    curr@ print
+
+    1 j!
+
+    loop j@ 14 < do
+        curr@ j@ 1 -    get a!
+        curr@ j@        get b!
+        curr@ j@ 1 +    get c!
+
+        a@ 2 <<
+        b@ 1 << |
+        c@      | ix!
+
+        next@ j@ PATTERNS@ ix@ get set
+
+        j@ 1 + j!
+    end
+
+    curr@ temp!
+    next@ curr!
+    temp@ next!
+
+    i@ 1 + i!
+end
+
