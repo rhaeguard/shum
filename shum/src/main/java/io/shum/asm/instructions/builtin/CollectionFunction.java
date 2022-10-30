@@ -53,6 +53,7 @@ public final class CollectionFunction implements BuiltInFunctionCall {
             mv.visitLabel(trueLabel);
             mv.visitMethodInsn(INVOKEINTERFACE, className, "addAll", "(Ljava/util/Collection;)Z", true);
             mv.visitLabel(endLabel);
+            POP_TOP.accept(mv);
         }),
         LIST_SET(mv -> {
             // push index

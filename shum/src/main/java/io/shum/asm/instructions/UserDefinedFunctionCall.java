@@ -86,11 +86,12 @@ public final class UserDefinedFunctionCall implements FunctionCall {
                 entry("&", () -> new BitwiseFunctionCall(BitwiseFunctionCall.Operation.BITWISE_AND)),
                 entry("|", () -> new BitwiseFunctionCall(BitwiseFunctionCall.Operation.BITWISE_OR)),
                 // printing
-                entry("print", PrintFunction::new),
+                entry("print", () -> new PrintFunction(PrintFunction.Operation.PRINT)),
+                entry("puts", () -> new PrintFunction(PrintFunction.Operation.PUTS)),
                 // other crucial functions
                 entry("swap", SwapFunction::new),
                 entry("drop", DropFunction::new),
-                entry("castlong", () -> new CastingFunctionCall(CastingFunctionCall.Operation.CAST_LONG))
+                entry("toInt", () -> new CastingFunctionCall(CastingFunctionCall.Operation.CAST_INT))
         );
 
         var allFunc = new HashMap<>(someEntries);

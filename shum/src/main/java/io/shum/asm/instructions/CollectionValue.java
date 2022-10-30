@@ -11,6 +11,7 @@ public final class CollectionValue implements Instruction {
 
     private final ContainerType type;
     private final List<Constant> elements;
+    private int localVariableIndex = 1;
 
     public CollectionValue(ContainerType type, List<Constant> elements) {
         this.type = type;
@@ -27,32 +28,36 @@ public final class CollectionValue implements Instruction {
         this.elements = elements;
     }
 
+    public void setLocalVariableIndex(int index) {
+        this.localVariableIndex = index;
+    }
+
     @Override
     public void apply(MethodVisitor mv) {
         if (type.containerType == ShumDataType.LIST) {
             mv.visitTypeInsn(Opcodes.NEW, "java/util/ArrayList");
             mv.visitInsn(DUP);
             mv.visitMethodInsn(INVOKESPECIAL, "java/util/ArrayList", "<init>", "()V", false);
-            mv.visitVarInsn(ASTORE, 1);
+            mv.visitVarInsn(ASTORE, localVariableIndex);
             for (var element : elements) {
-                mv.visitVarInsn(ALOAD, 1);
+                mv.visitVarInsn(ALOAD, localVariableIndex);
                 element.apply(mv); // this will load the variable onto the stack
                 mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "add", "(Ljava/lang/Object;)Z", true);
                 mv.visitInsn(POP);
             }
-            mv.visitVarInsn(ALOAD, 1);
+            mv.visitVarInsn(ALOAD, localVariableIndex);
         } else if (type.containerType == ShumDataType.SET) {
             mv.visitTypeInsn(Opcodes.NEW, "java/util/HashSet");
             mv.visitInsn(DUP);
             mv.visitMethodInsn(INVOKESPECIAL, "java/util/HashSet", "<init>", "()V", false);
-            mv.visitVarInsn(ASTORE, 1);
+            mv.visitVarInsn(ASTORE, localVariableIndex);
             for (var element : elements) {
-                mv.visitVarInsn(ALOAD, 1);
+                mv.visitVarInsn(ALOAD, localVariableIndex);
                 element.apply(mv); // this will load the variable onto the stack
                 mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Set", "add", "(Ljava/lang/Object;)Z", true);
                 mv.visitInsn(POP);
             }
-            mv.visitVarInsn(ALOAD, 1);
+            mv.visitVarInsn(ALOAD, localVariableIndex);
         }
     }
 
