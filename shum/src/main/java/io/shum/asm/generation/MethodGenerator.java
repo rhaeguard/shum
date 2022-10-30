@@ -2,8 +2,6 @@ package io.shum.asm.generation;
 
 import io.shum.asm.instructions.FunctionDeclaration;
 import io.shum.asm.instructions.Instruction;
-import io.shum.asm.instructions.VariableDeclaration;
-import io.shum.asm.instructions.VariableOperation;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.commons.LocalVariablesSorter;
 
@@ -45,10 +43,12 @@ public class MethodGenerator {
                 cw.visitMethod(ACC_PUBLIC + ACC_STATIC, methodName, descriptor, null, null)
         );
 
+        // load all the parameters to the method call stack
         for (int i = 0; i < fd.getParameterCount(); i++) {
             mv.visitVarInsn(ALOAD, i);
         }
 
+        // initialize all the variables
         for (var variable : fd.getVariables()) {
             mv.visitInsn(ACONST_NULL);
             mv.visitVarInsn(ASTORE, variable.getLocalVariableIndex());

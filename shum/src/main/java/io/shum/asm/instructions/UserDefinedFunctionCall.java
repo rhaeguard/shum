@@ -80,11 +80,18 @@ public final class UserDefinedFunctionCall implements FunctionCall {
                 entry("==", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.EQUAL)),
                 entry("!=", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.NOT_EQUAL)),
                 entry("not", () -> new ComparisonFunctionCall(ComparisonFunctionCall.Operation.NOT)),
+                //      bitwise operations
+                entry("<<", () -> new BitwiseFunctionCall(BitwiseFunctionCall.Operation.SHIFT_LEFT)),
+                entry(">>", () -> new BitwiseFunctionCall(BitwiseFunctionCall.Operation.SHIFT_RIGHT)),
+                entry("&", () -> new BitwiseFunctionCall(BitwiseFunctionCall.Operation.BITWISE_AND)),
+                entry("|", () -> new BitwiseFunctionCall(BitwiseFunctionCall.Operation.BITWISE_OR)),
                 // printing
-                entry("print", PrintFunction::new),
+                entry("print", () -> new PrintFunction(PrintFunction.Operation.PRINT)),
+                entry("puts", () -> new PrintFunction(PrintFunction.Operation.PUTS)),
                 // other crucial functions
                 entry("swap", SwapFunction::new),
-                entry("drop", DropFunction::new)
+                entry("drop", DropFunction::new),
+                entry("toInt", () -> new CastingFunctionCall(CastingFunctionCall.Operation.CAST_INT))
         );
 
         var allFunc = new HashMap<>(someEntries);

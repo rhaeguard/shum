@@ -76,12 +76,15 @@ public class Compiler {
 
         boolean shouldRun = options.contains("--run");
         boolean debugInstructions = options.contains("--debugInstructions");
+        boolean debugLexedTokens = options.contains("--debugLexedTokens");
 
         var file = new File(filename);
         var tokens = new Lexer(file).lex();
-//        for (Token token : tokens) {
-//            System.out.println(token);
-//        }
+
+        if (debugLexedTokens) {
+            tokens.forEach(System.out::println);
+        }
+
         var instructions = new Parser(tokens, new Context()).parse();
 
         new Compiler(instructions)

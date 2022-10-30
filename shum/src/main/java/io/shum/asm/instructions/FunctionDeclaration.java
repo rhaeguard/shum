@@ -36,6 +36,12 @@ public final class FunctionDeclaration implements Instruction {
                 localVariables.put(vd.getName(), vd.withIndex(localVariableIndex++));
             }
         }
+
+        for (var instruction : instructions) {
+            if (instruction instanceof CollectionValue cv) {
+                cv.setLocalVariableIndex(localVariableIndex++);
+            }
+        }
     }
 
     @Override
