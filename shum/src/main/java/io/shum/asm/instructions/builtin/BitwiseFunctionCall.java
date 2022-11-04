@@ -2,7 +2,6 @@ package io.shum.asm.instructions.builtin;
 
 import org.objectweb.asm.MethodVisitor;
 
-import static io.shum.asm.instructions.CastingInstructions.INT_TO_LONG_OBJECT;
 import static io.shum.asm.instructions.CastingInstructions.LONG_OBJECT_TO_INT;
 
 public final class BitwiseFunctionCall implements BuiltInFunctionCall {

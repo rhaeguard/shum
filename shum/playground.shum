@@ -1,42 +1,35 @@
-macro GEN_SIZE = 100 end
-macro PATTERNS = [0 1 1 1 0 1 1 0] end
+let GEN_SIZE:int 100 GEN_SIZE!
+let PATTERNS:list [0 1 1 1 0 1 1 0] PATTERNS!
 
-let curr:list
-GEN_SIZE emptyListOfSize curr!
+let curr:list GEN_SIZE@ emptyListOfSize curr!
 curr@ curr@ size 2 - 1 set          // set the penultimate element to 1
 
-let next:list
-GEN_SIZE emptyListOfSize next!
+let next:list GEN_SIZE@ emptyListOfSize next!
 
-let i:int
-let a:int
-let b:int
-let c:int
-let ix:int
-let temp:list
-let j:int
+let i:int 0 i!
 
-0 i!
-loop i@ GEN_SIZE < do
+loop i@ GEN_SIZE@ < do
+    curr@ printGeneration
 
-    curr@ toStringList
+    let j:int 1 j!
 
-    1 j!
+    loop j@ GEN_SIZE@ decr < do
+        let a:int   curr@ j@ decr   get a!
+        let b:int   curr@ j@        get b!
+        let c:int   curr@ j@ incr   get c!
 
-    loop j@ GEN_SIZE decr < do
-        curr@ j@ decr   get a!
-        curr@ j@        get b!
-        curr@ j@ incr   get c!
+        let ix:int
 
         a@ 2 <<
         b@ 1 << |
         c@      | ix!
 
-        next@ j@ PATTERNS ix@ get set
+        next@ j@ PATTERNS@ ix@ get set
 
         j@ incr j!
     end
 
+    let temp:list
     curr@ temp!
     next@ curr!
     temp@ next!
@@ -45,15 +38,10 @@ loop i@ GEN_SIZE < do
 end
 
 func emptyListOfSize int -> list =
-    let length:int
-    length!
+    let length:int length! // grab the first parameter
+    let arr:list [] arr!
 
-    let arr:list
-    [] arr!
-
-    let i:int
-    0 i!
-
+    let i:int 0 i!
     loop i@ length@ < do
         arr@ 0 append
         i@ incr i!
@@ -62,15 +50,11 @@ func emptyListOfSize int -> list =
     arr@ return
 end
 
-func toStringList list -> =
-    let array:list
-    array!
+func printGeneration list -> =
+    let array:list array! // grab the first parameter
+    let count:int array@ size count!
 
-    let count:int
-    array@ size count!
-
-    let i:int
-    0 i!
+    let i:int 0 i!
 
     loop i@ count@ < do
         array@ i@ get toInt

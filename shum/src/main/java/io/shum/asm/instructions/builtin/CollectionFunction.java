@@ -1,6 +1,7 @@
 package io.shum.asm.instructions.builtin;
 
 import io.shum.asm.instructions.FunctionCall;
+import io.shum.asm.instructions.Instruction;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 

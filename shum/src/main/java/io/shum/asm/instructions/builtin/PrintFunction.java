@@ -4,6 +4,7 @@ import org.objectweb.asm.MethodVisitor;
 
 public final class PrintFunction implements BuiltInFunctionCall {
 
+
     public enum Operation {
         PRINT, PUTS
     }

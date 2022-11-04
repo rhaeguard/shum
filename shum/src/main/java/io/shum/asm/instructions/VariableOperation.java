@@ -6,7 +6,10 @@ import io.shum.language.type.ShumDataType;
 import io.shum.utils.Maybe;
 import org.objectweb.asm.MethodVisitor;
 
-public final class VariableOperation implements Instruction {
+// TODO: calling variable operation as Value is not a good idea, imo
+// TODO: maybe create a DynamicValue class that will wrap the VariableOperation?
+public final class VariableOperation implements Value, WithScope {
+
     public enum Operation {
         LOAD, STORE
     }
@@ -14,7 +17,7 @@ public final class VariableOperation implements Instruction {
     private final Operation operation;
     private final String name;
     private final Context context;
-    private String functionName;
+    private Scope scope;
 
     public VariableOperation(Operation operation, String name, Context context) {
         this.operation = operation;
@@ -22,52 +25,46 @@ public final class VariableOperation implements Instruction {
         this.context = context;
     }
 
-    public void withFunction(String functionName) {
-        this.functionName = functionName;
-    }
-
     @Override
     public void apply(MethodVisitor mv) {
-        if (functionName == null) {
-            var vd = getVariableDeclaration();
-            if (operation == Operation.LOAD) {
-                mv.visitFieldInsn(GETSTATIC, Compiler.MAIN_CLASS_NAME, name, vd.jvmType);
-            } else if (operation == Operation.STORE) {
-                // assuming that there already exists an appropriate value at the top of the stack
-                mv.visitTypeInsn(CHECKCAST, vd.getClassName());
-                mv.visitFieldInsn(PUTSTATIC, Compiler.MAIN_CLASS_NAME, name, vd.jvmType);
+        if (scope != null) {
+            // if scope exists look for the variable in the local context
+            var vd = scope.getLocalVariable(name);
+            if (vd != null) {
+                int localIndex = vd.getVariableIndex();
+                if (operation == Operation.LOAD) {
+                    mv.visitVarInsn(ALOAD, localIndex);
+                } else if (operation == Operation.STORE) {
+                    mv.visitTypeInsn(CHECKCAST, vd.getDataType().getTopLevelDataType().getClassName());
+                    mv.visitVarInsn(ASTORE, localIndex);
+                } else {
+                    throw new RuntimeException("Unsupported operation: " + operation);
+                }
             } else {
-                throw new RuntimeException("Unsupported operation: " + operation);
+                handleStaticVariable(mv);
             }
         } else {
-            var maybeFd = context.getFunctionDeclaration(functionName);
-            if (maybeFd instanceof Maybe.Some<FunctionDeclaration> sfd) {
-                apply(mv, sfd.getValue());
-            } else {
-                throw new RuntimeException("Unknown function: " + functionName);
-            }
+            handleStaticVariable(mv);
         }
     }
 
-    private void apply(MethodVisitor mv, FunctionDeclaration fd) {
-        var maybeVd = fd.getVariable(name);
-        final VariableDeclaration vd;
-        if (maybeVd instanceof Maybe.Some<VariableDeclaration> svd) {
-            vd = svd.getValue();
-        } else {
-            throw new RuntimeException("Unknown variable: " + name);
-        }
-
-        int localIndex = vd.getLocalVariableIndex();
-
+    private void handleStaticVariable(MethodVisitor mv) {
+        // look for the variable in the global context
+        var shumDataType = getVariableDeclaration();
         if (operation == Operation.LOAD) {
-            mv.visitVarInsn(ALOAD, localIndex);
+            mv.visitFieldInsn(GETSTATIC, Compiler.MAIN_CLASS_NAME, name, shumDataType.jvmType);
         } else if (operation == Operation.STORE) {
-            mv.visitTypeInsn(CHECKCAST, vd.getDataType().getTopLevelDataType().getClassName());
-            mv.visitVarInsn(ASTORE, localIndex);
+            // assuming that there already exists an appropriate value at the top of the stack
+            mv.visitTypeInsn(CHECKCAST, shumDataType.getClassName());
+            mv.visitFieldInsn(PUTSTATIC, Compiler.MAIN_CLASS_NAME, name, shumDataType.jvmType);
         } else {
             throw new RuntimeException("Unsupported operation: " + operation);
         }
+    }
+
+    @Override
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
     private ShumDataType getVariableDeclaration() {
