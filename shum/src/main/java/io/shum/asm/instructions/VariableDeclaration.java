@@ -3,13 +3,15 @@ package io.shum.asm.instructions;
 import io.shum.language.type.Type;
 import org.objectweb.asm.MethodVisitor;
 
-public final class VariableDeclaration implements Instruction {
+public final class VariableDeclaration implements Instruction, WithScope {
 
     private final String name;
     private final Type dataType;
     // used for local variables
     // it is -1 for static variable
-    private int localVariableIndex = -1;
+    private int variableIndex = -1;
+
+    private Scope scope;
 
     public String getName() {
         return name;
@@ -19,8 +21,8 @@ public final class VariableDeclaration implements Instruction {
         return dataType;
     }
 
-    public int getLocalVariableIndex() {
-        return localVariableIndex;
+    public int getVariableIndex() {
+        return variableIndex;
     }
 
     public VariableDeclaration(String name, Type dataType) {
@@ -28,15 +30,16 @@ public final class VariableDeclaration implements Instruction {
         this.dataType = dataType;
     }
 
-    public VariableDeclaration withIndex(int index) {
-        this.localVariableIndex = index;
-        return this;
+    @Override
+    public void apply(MethodVisitor mv) {
+        this.variableIndex = this.scope.nextIndex(this);
+        mv.visitInsn(ACONST_NULL);
+        mv.visitVarInsn(ASTORE, this.variableIndex);
     }
 
     @Override
-    public void apply(MethodVisitor mv) {
-        // TODO
-        throw new RuntimeException("Unsupported operation");
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
 }

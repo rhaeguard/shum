@@ -80,7 +80,8 @@ public class Parser {
 
         // everything must be a constant!
         // todo: support VARIABLE_LOAD as well
-        if (elementTokens.stream().anyMatch(e -> e.tokenType() != TokenType.VALUE)) {
+
+        if (!elementTokens.stream().allMatch(e -> e.tokenType() == TokenType.VALUE || e.tokenType() == TokenType.VARIABLE_LOAD)) {
             throw new RuntimeException("Collection values must be constants!");
         }
 
@@ -123,20 +124,20 @@ public class Parser {
     }
 
     private LoopStatement parseLoopStatement() {
-        var conditionMacro = parseMacroBody("condition", Set.of(TokenType.DO));
-        var loopBodyMacro = parseMacroBody("body", Set.of(TokenType.END));
+        var conditionMacro = parseMacroBody(Set.of(TokenType.DO));
+        var loopBodyMacro = parseMacroBody(Set.of(TokenType.END));
         return new LoopStatement(conditionMacro, loopBodyMacro);
     }
 
     private IfElseCondition parseIfStatement() {
-        var trueMacro = parseMacroBody("true", Set.of(TokenType.END, TokenType.ELSE));
+        var trueMacro = parseMacroBody(Set.of(TokenType.END, TokenType.ELSE));
 
-        final MacroDeclaration falseMacro;
+        final List<Instruction> falseMacro;
         if (current().tokenType() == TokenType.ELSE) {
-            falseMacro = parseMacroBody("false", Set.of(TokenType.END));
+            falseMacro = parseMacroBody(Set.of(TokenType.END));
         } else {
             next(); // it's the ELSE or END token, so we need to move to the next token
-            falseMacro = new MacroDeclaration("false", emptyList());
+            falseMacro = emptyList();
         }
         return new IfElseCondition(trueMacro, falseMacro);
     }
@@ -160,6 +161,18 @@ public class Parser {
         }
 
         return new MacroDeclaration(name, macroInstructions);
+    }
+
+    private List<Instruction> parseMacroBody(Set<TokenType> terminationTokens) {
+        var instrToken = next();
+        var macroInstructions = new ArrayList<Instruction>();
+        while (!terminationTokens.contains(instrToken.tokenType())) {
+            var instruction = parseCallableBodyInstruction(instrToken);
+            macroInstructions.add(instruction);
+            instrToken = next();
+        }
+
+        return macroInstructions;
     }
 
     private Instruction parseCallableBodyInstruction(Token token) {
@@ -188,26 +201,12 @@ public class Parser {
             }
             var instruction = parseCallableBodyInstruction(instrToken);
 
-            injectFunctionInformationIntoVariableOperations(name, instruction);
-
             functionInstructions.add(instruction);
             instrToken = next();
         }
-        return new FunctionDeclaration(name, sig, functionInstructions);
-    }
-
-    private void injectFunctionInformationIntoVariableOperations(String functionName, Instruction instruction) {
-        if (instruction instanceof VariableOperation vo) {
-            vo.withFunction(functionName);
-        } else if (instruction instanceof LoopStatement ls) {
-            injectFunctionInformationIntoVariableOperations(functionName, ls.getCondition());
-            injectFunctionInformationIntoVariableOperations(functionName, ls.getBody());
-        } else if (instruction instanceof IfElseCondition ic) {
-            injectFunctionInformationIntoVariableOperations(functionName, ic.getTrueBranch());
-            injectFunctionInformationIntoVariableOperations(functionName, ic.getFalseBranch());
-        } else if (instruction instanceof MacroDeclaration md) {
-            md.getInstructions().forEach(i -> injectFunctionInformationIntoVariableOperations(functionName, i));
-        }
+        var fd = new FunctionDeclaration(name, sig, functionInstructions);
+        fd.setScope(FunctionDeclaration.createNewFunctionScope(fd));
+        return fd;
     }
 
     private FunctionDeclaration.FunctionSignature parseFunctionSignature() {
@@ -226,12 +225,14 @@ public class Parser {
         var paramTypes = signatureTokens.stream()
                 .takeWhile(t -> t.tokenType() != TokenType.ARROW)
                 .map(Token::value)
+                .map(ShumDataType::getDataType)
                 .toList();
 
         var returnTypes = signatureTokens.stream()
                 .dropWhile(t -> t.tokenType() != TokenType.ARROW)
                 .skip(1)
                 .map(Token::value)
+                .map(ShumDataType::getDataType)
                 .toList();
 
         if (returnTypes.size() > 1) {
@@ -249,7 +250,7 @@ public class Parser {
         throw new RuntimeException("Function/macro name is not in a proper format. Does not match the pattern: [a-zA-Z_\\-][a-zA-Z_0-9\\-]*");
     }
 
-    private Constant parseValue(Token token) {
+    private Value parseValue(Token token) {
         var tokenValue = token.value();
         if (Utils.isDoubleQuoted(tokenValue) || Utils.isSingleQuoted(tokenValue)) {
             return new Constant(ShumDataType.STRING, tokenValue.substring(1, tokenValue.length() - 1));
@@ -261,6 +262,10 @@ public class Parser {
 
         if (Utils.isFloatingPoint(tokenValue)) {
             return new Constant(ShumDataType.DOUBLE, tokenValue);
+        }
+
+        if (token.tokenType() == TokenType.VARIABLE_LOAD) {
+            return new VariableOperation(VariableOperation.Operation.LOAD, token.value(), context);
         }
 
         throw new RuntimeException(String.format("Token '%s' is unknown", tokenValue));

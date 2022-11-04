@@ -2,6 +2,7 @@ package io.shum.asm.instructions.builtin;
 
 import io.shum.asm.instructions.CastingInstructions;
 import io.shum.asm.instructions.FunctionCall;
+import io.shum.asm.instructions.Instruction;
 import org.objectweb.asm.MethodVisitor;
 
 import java.util.Arrays;

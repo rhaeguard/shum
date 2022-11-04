@@ -1,5 +1,6 @@
 package io.shum.asm.instructions.builtin;
 
+import io.shum.asm.instructions.Instruction;
 import org.objectweb.asm.MethodVisitor;
 
 public final class BinaryArithmeticFunctionCall implements ArithmeticFunctionCall {
@@ -17,6 +18,7 @@ public final class BinaryArithmeticFunctionCall implements ArithmeticFunctionCal
     }
 
     private final Operation operation;
+    private Instruction parent;
 
     public BinaryArithmeticFunctionCall(Operation operation) {
         this.operation = operation;

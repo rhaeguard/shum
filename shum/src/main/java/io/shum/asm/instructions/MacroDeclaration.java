@@ -4,10 +4,12 @@ import org.objectweb.asm.MethodVisitor;
 
 import java.util.List;
 
-public final class MacroDeclaration implements Instruction {
+public final class MacroDeclaration implements Instruction, WithScope {
 
     private final String name;
     private final List<Instruction> instructions;
+
+    private Scope scope;
 
     public MacroDeclaration(String name, List<Instruction> instructions) {
         this.name = name;
@@ -23,6 +25,11 @@ public final class MacroDeclaration implements Instruction {
         for (var instruction : instructions) {
             instruction.apply(mv);
         }
+    }
+
+    @Override
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
     public String getName() {

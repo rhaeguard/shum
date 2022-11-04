@@ -7,23 +7,23 @@ import org.objectweb.asm.Opcodes;
 
 import java.util.List;
 
-public final class CollectionValue implements Instruction {
+public final class CollectionValue implements Value {
 
     private final ContainerType type;
-    private final List<Constant> elements;
+    private final List<Value> elements;
     private int localVariableIndex = 1;
 
-    public CollectionValue(ContainerType type, List<Constant> elements) {
+    public CollectionValue(ContainerType type, List<Value> elements) {
         this.type = type;
 
-        if (type.elementType.getTopLevelDataType() != ShumDataType.NOTHING) {
-            var elementType = type.elementType.getTopLevelDataType();
-            for (Constant element : elements) {
-                if (element.getDataType() != elementType) {
-                    throw new RuntimeException("All the elements of the collection need to be of type: " + element.getDataType().name);
-                }
-            }
-        }
+//        if (type.elementType.getTopLevelDataType() != ShumDataType.NOTHING) {
+//            var elementType = type.elementType.getTopLevelDataType();
+//            for (var element : elements) {
+//                if (element.getDataType() != elementType) {
+//                    throw new RuntimeException("All the elements of the collection need to be of type: " + element.getDataType().name);
+//                }
+//            }
+//        }
 
         this.elements = elements;
     }

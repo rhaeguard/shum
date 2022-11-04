@@ -3,10 +3,12 @@ package io.shum.asm.instructions;
 import io.shum.language.type.ShumDataType;
 import org.objectweb.asm.MethodVisitor;
 
-public final class Constant implements Instruction {
+public final class Constant implements Value {
 
     private final ShumDataType dataType;
     private final String value;
+
+    private Instruction parent;
 
     public Constant(ShumDataType dataType, String value) {
         this.dataType = dataType;
