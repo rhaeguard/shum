@@ -34,4 +34,10 @@ public final class Scope {
                 newVariables, nextLocalVariableIndex
         );
     }
+
+    public void allocateFunctionParameter(FunctionDeclaration.FunctionParameter param, int index) {
+        var vd = new VariableDeclaration(param.name(), param.type());
+        vd.setVariableIndex(index);
+        this.variables.put(param.name(), vd);
+    }
 }

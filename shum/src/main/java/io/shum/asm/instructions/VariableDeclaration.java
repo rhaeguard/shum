@@ -37,6 +37,10 @@ public final class VariableDeclaration implements Instruction, WithScope {
         mv.visitVarInsn(ASTORE, this.variableIndex);
     }
 
+    public void setVariableIndex(int index) {
+        this.variableIndex = index;
+    }
+
     @Override
     public void setScope(Scope scope) {
         this.scope = scope;

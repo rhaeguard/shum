@@ -1,70 +1,25 @@
-let GEN_SIZE:int 100 GEN_SIZE!
-let PATTERNS:list [0 1 1 1 0 1 1 0] PATTERNS!
+func parenthesize
+        input:string -> string
+=
+    "("
+    input@
+    ++
+    ")"
+    ++
 
-let curr:list GEN_SIZE@ emptyListOfSize curr!
-curr@ curr@ size 2 - 1 set          // set the penultimate element to 1
-
-let next:list GEN_SIZE@ emptyListOfSize next!
-
-let i:int 0 i!
-
-loop i@ GEN_SIZE@ < do
-    curr@ printGeneration
-
-    let j:int 1 j!
-
-    loop j@ GEN_SIZE@ decr < do
-        let a:int   curr@ j@ decr   get a!
-        let b:int   curr@ j@        get b!
-        let c:int   curr@ j@ incr   get c!
-
-        let ix:int
-
-        a@ 2 <<
-        b@ 1 << |
-        c@      | ix!
-
-        next@ j@ PATTERNS@ ix@ get set
-
-        j@ incr j!
-    end
-
-    let temp:list
-    curr@ temp!
-    next@ curr!
-    temp@ next!
-
-    i@ incr i!
+    return
 end
 
-func emptyListOfSize int -> list =
-    let length:int length! // grab the first parameter
-    let arr:list [] arr!
+"hello" parenthesize print
 
-    let i:int 0 i!
-    loop i@ length@ < do
-        arr@ 0 append
-        i@ incr i!
-    end
+func hey
+    a:int b:string c:list ->
+=
 
-    arr@ return
+    a@ print
+    b@ print
+    c@ print
+
 end
 
-func printGeneration list -> =
-    let array:list array! // grab the first parameter
-    let count:int array@ size count!
-
-    let i:int 0 i!
-
-    loop i@ count@ < do
-        array@ i@ get toInt
-
-        0 == if " "
-        else "*"
-        end
-
-        puts
-        i@ incr i!
-    end
-    "" print
-end
+1 "222" [1 2 3] hey
