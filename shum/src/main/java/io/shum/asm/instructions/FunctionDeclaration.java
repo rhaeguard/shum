@@ -11,7 +11,7 @@ public final class FunctionDeclaration implements Instruction, WithScope {
 
     private final String name;
     private final int parameterCount;
-    private final List<Type> parameters;
+    private final List<FunctionParameter> parameters;
     private final boolean returns;
     private final List<Type> returnTypes;
     private final String descriptor;
@@ -41,14 +41,23 @@ public final class FunctionDeclaration implements Instruction, WithScope {
     @Override
     public void apply(MethodVisitor mv) {
         // load all the parameters to the method call stack
-        for (int i = 0; i < getParameterCount(); i++) {
-            mv.visitVarInsn(ALOAD, i);
+        for (int i = 0; i < this.parameters.size(); i++) {
+            var param = this.parameters.get(i);
+                mv.visitVarInsn(ALOAD, i);
+            if (param.name != null) {
+                mv.visitVarInsn(ASTORE, i);
+                // save the named parameters
+                this.scope.allocateFunctionParameter(param, i);
+            }
         }
 
         for (var instruction : instructions) {
             if (instruction instanceof VariableDeclaration || instruction instanceof VariableOperation) {
+                // variable operations modify the current scope
                 ((WithScope) instruction).setScope(this.scope);
             } else if (instruction instanceof WithScope ws) {
+                // while operations that are scoped themselves clone the scope and
+                // modify it just for themselves; outside that scope, the changes are not visible
                 ws.setScope(this.scope.cloneScope());
             }
             instruction.apply(mv);
@@ -69,7 +78,7 @@ public final class FunctionDeclaration implements Instruction, WithScope {
         var returnType = returns ? returnTypes.get(0).getTopLevelDataType().jvmType : "V";
 
         var params = parameters.stream()
-                .map(p -> p.getTopLevelDataType().jvmType)
+                .map(p -> p.type.getTopLevelDataType().jvmType)
                 .collect(joining());
 
         return String.format("(%s)%s", params, returnType);
@@ -78,7 +87,7 @@ public final class FunctionDeclaration implements Instruction, WithScope {
     @Override
     public String toString() {
         var name = this.name;
-        var params = this.parameters.stream().map(p -> p.getTopLevelDataType().name).collect(joining(" ", "(", ")"));
+        var params = this.parameters.stream().map(p -> String.format("%s:%s", p.name, p.type.getTopLevelDataType().jvmType)).collect(joining(" ", "(", ")"));
         var returnType = this.returnTypes.stream().map(p -> p.getTopLevelDataType().name).collect(joining(" ", "(", ")"));
         return String.format("%s %s->%s [%s]", name, params, returnType, instructions.toString());
     }
@@ -91,6 +100,7 @@ public final class FunctionDeclaration implements Instruction, WithScope {
         return parameterCount;
     }
 
-    public record FunctionSignature(List<Type> parameters, List<Type> returnTypes) {
-    }
+    public record FunctionSignature(List<FunctionParameter> parameters, List<Type> returnTypes) {}
+
+    public record FunctionParameter(String name, Type type) {}
 }

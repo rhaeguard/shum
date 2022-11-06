@@ -224,8 +224,7 @@ public class Parser {
 
         var paramTypes = signatureTokens.stream()
                 .takeWhile(t -> t.tokenType() != TokenType.ARROW)
-                .map(Token::value)
-                .map(ShumDataType::getDataType)
+                .map(Parser::getFunctionSignature)
                 .toList();
 
         var returnTypes = signatureTokens.stream()
@@ -240,6 +239,18 @@ public class Parser {
         }
 
         return new FunctionDeclaration.FunctionSignature(paramTypes, returnTypes);
+    }
+
+    private static FunctionDeclaration.FunctionParameter getFunctionSignature(Token token) {
+        var tokenStr = token.value();
+        if (tokenStr.contains(":")) {
+            var pieces = tokenStr.split(":");
+            var name = pieces[0];
+            var type = ShumDataType.getDataType(pieces[1]);
+            return new FunctionDeclaration.FunctionParameter(name, type);
+        }
+        var type = ShumDataType.getDataType(tokenStr);
+        return new FunctionDeclaration.FunctionParameter(null, type);
     }
 
     private String parseFunctionName() {
