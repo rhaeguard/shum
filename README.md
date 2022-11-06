@@ -167,7 +167,7 @@ end
 sum@ print                  // print the result which should be 120
 ```
 
-Variables defined outside of any function are global, and the ones declared inside of a function are local. Global and local variables can have the same name, and in that case, the local variable will shadow the global one for that function. **Local variables can only be created inside of the main body of the function!** 
+Variables defined outside of any function are global, and the ones declared inside of a function/loop/if statement are local. Global and local variables can have the same name, and in that case, the local variable will shadow the global one for that function. 
 
 A little bit of an exaggerated example of a function using local variables.
 ```
@@ -202,6 +202,14 @@ If function expects a parameter, we need to mention the types, and also what it 
 
 ```
 func add5 int -> int = 5 + return end
+```
+
+Function parameters can be named as well:
+
+```
+func surroundString word:string left:string right:string -> string =
+    ...
+end
 ```
 
 The `return` keyword specifies that the function returns a value at the end of its execution. If the function is called somewhere else, and the value produced by the function is needed, then you need to use the `return` keyword.

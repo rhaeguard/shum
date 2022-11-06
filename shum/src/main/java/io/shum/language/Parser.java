@@ -7,6 +7,7 @@ import io.shum.language.type.ShumDataType;
 import io.shum.language.type.Type;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -132,13 +133,10 @@ public class Parser {
     private IfElseCondition parseIfStatement() {
         var trueMacro = parseMacroBody(Set.of(TokenType.END, TokenType.ELSE));
 
-        final List<Instruction> falseMacro;
-        if (current().tokenType() == TokenType.ELSE) {
-            falseMacro = parseMacroBody(Set.of(TokenType.END));
-        } else {
-            next(); // it's the ELSE or END token, so we need to move to the next token
-            falseMacro = emptyList();
-        }
+        // it's the ELSE or END token, so we need to move to the next token
+        var falseMacro = current().tokenType() == TokenType.ELSE
+                ? parseMacroBody(Set.of(TokenType.END))
+                : Collections.<Instruction>emptyList();
         return new IfElseCondition(trueMacro, falseMacro);
     }
 
