@@ -265,7 +265,7 @@ public class Parser {
         }
 
         if (token.tokenType() == TokenType.VARIABLE_LOAD) {
-            return new VariableOperation(VariableOperation.Operation.LOAD, token.value(), context);
+            return new DynamicValue(new VariableOperation(VariableOperation.Operation.LOAD, token.value(), context));
         }
 
         throw new RuntimeException(String.format("Token '%s' is unknown", tokenValue));

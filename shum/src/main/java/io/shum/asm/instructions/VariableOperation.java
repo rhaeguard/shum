@@ -8,7 +8,7 @@ import org.objectweb.asm.MethodVisitor;
 
 // TODO: calling variable operation as Value is not a good idea, imo
 // TODO: maybe create a DynamicValue class that will wrap the VariableOperation?
-public final class VariableOperation implements Value, WithScope {
+public final class VariableOperation implements Instruction, WithScope {
 
     public enum Operation {
         LOAD, STORE

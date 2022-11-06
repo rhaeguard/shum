@@ -28,10 +28,6 @@ public final class CollectionValue implements Value {
         this.elements = elements;
     }
 
-    public void setLocalVariableIndex(int index) {
-        this.localVariableIndex = index;
-    }
-
     @Override
     public void apply(MethodVisitor mv) {
         if (type.containerType == ShumDataType.LIST) {
