@@ -11,8 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static java.util.Collections.emptyList;
-
 public class Parser {
 
     private int instructionPointer;
@@ -37,6 +35,11 @@ public class Parser {
         return res;
     }
 
+    private boolean expect(TokenType tokenType) {
+        if (instructionPointer >= tokens.size()) return false;
+        return tokens.get(instructionPointer).tokenType() == tokenType;
+    }
+
     private Token current() {
         return tokens.get(instructionPointer - 1);
     }
@@ -51,11 +54,10 @@ public class Parser {
                 case FUNC -> parseFuncDeclaration();
                 case IF -> parseIfStatement();
                 case LOOP -> parseLoopStatement();
-                case VALUE -> parseValue(token);
+                case VALUE, LIST_NOTATION, SET_NOTATION, DICT_NOTATION -> parseValueGeneral(token);
                 case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(token.value(), context);
                 case LET -> parseLet();
                 case VARIABLE_LOAD, VARIABLE_STORE -> parseVariableOp(token);
-                case LIST_NOTATION, SET_NOTATION, DICT_NOTATION -> parseCollectionNotation(token);
                 default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
             };
 
@@ -68,10 +70,19 @@ public class Parser {
                 context.createNewStaticVariableDeclaration(vd);
             }
 
-            this.instructions.add(parsedInstruction);
+            appendInstruction(this.instructions, parsedInstruction);
         }
 
         return this.instructions;
+    }
+
+    private Value parseValueGeneral(Token token) {
+        return switch (token.tokenType()) {
+            case VALUE -> parseValue(token);
+            case LIST_NOTATION, SET_NOTATION, DICT_NOTATION -> parseCollectionNotation(token);
+            case VARIABLE_LOAD -> new DynamicValue(parseVariableOp(token));
+            default -> throw new IllegalStateException("Not a value producing token: " + token.tokenType());
+        };
     }
 
     private CollectionValue parseCollectionNotation(Token token) {
@@ -121,6 +132,13 @@ public class Parser {
         var type = pieces[1];
 
         var dataType = ShumDataType.getDataType(type);
+
+        if (expect(TokenType.EQUAL)) {
+            next(); // skip EQUAL
+            var value = parseValueGeneral(next());
+            return new VariableDeclaration(name, dataType, value);
+        }
+
         return new VariableDeclaration(name, dataType);
     }
 
@@ -149,12 +167,24 @@ public class Parser {
         return parseMacroBody(name, Set.of(TokenType.END));
     }
 
+    /**
+     * Appends a new instruction into the existing list of instructions, and handles variable init syntactic sugar
+     */
+    private void appendInstruction(List<Instruction> instructions, Instruction newInstruction) {
+        instructions.add(newInstruction);
+        if (newInstruction instanceof VariableDeclaration vd && vd.hasInitialValue()) {
+            var vo = new VariableOperation(VariableOperation.Operation.STORE, vd.getName(), context);
+            instructions.add(vd.getInitialValue());
+            instructions.add(vo);
+        }
+    }
+
     private MacroDeclaration parseMacroBody(String name, Set<TokenType> terminationTokens) {
         var instrToken = next();
         var macroInstructions = new ArrayList<Instruction>();
         while (!terminationTokens.contains(instrToken.tokenType())) {
             var instruction = parseCallableBodyInstruction(instrToken);
-            macroInstructions.add(instruction);
+            appendInstruction(macroInstructions, instruction);
             instrToken = next();
         }
 
@@ -166,7 +196,7 @@ public class Parser {
         var macroInstructions = new ArrayList<Instruction>();
         while (!terminationTokens.contains(instrToken.tokenType())) {
             var instruction = parseCallableBodyInstruction(instrToken);
-            macroInstructions.add(instruction);
+            appendInstruction(macroInstructions, instruction);
             instrToken = next();
         }
 
@@ -175,13 +205,12 @@ public class Parser {
 
     private Instruction parseCallableBodyInstruction(Token token) {
         return switch (token.tokenType()) {
-            case VALUE -> parseValue(token);
+            case VALUE, LIST_NOTATION, SET_NOTATION, DICT_NOTATION -> parseValueGeneral(token);
             case IF -> parseIfStatement();
             case LOOP -> parseLoopStatement();
             case FUNCTION_INVOCATION -> UserDefinedFunctionCall.createFunctionCall(token.value(), context);
             case LET -> parseLet();
             case VARIABLE_LOAD, VARIABLE_STORE -> parseVariableOp(token);
-            case LIST_NOTATION -> parseCollectionNotation(token);
             default -> throw new IllegalStateException("Unexpected token: " + token.tokenType());
         };
     }
@@ -198,8 +227,7 @@ public class Parser {
                 continue;
             }
             var instruction = parseCallableBodyInstruction(instrToken);
-
-            functionInstructions.add(instruction);
+            appendInstruction(functionInstructions, instruction);
             instrToken = next();
         }
         var fd = new FunctionDeclaration(name, sig, functionInstructions);

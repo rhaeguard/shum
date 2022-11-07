@@ -1,7 +1,6 @@
 // declare a list called 'nums'
-let nums:list[int]
 // initialize nums to the list below
-[1 2 3 4 3] nums!
+let nums:list[int] = [1 2 3 4 3]
 
 // a macro for debugging purposes
 // it simply prints the whole list
@@ -34,25 +33,21 @@ nums@ first print               // expected: 1
 nums@ last print                // expected: 9
 nums@ hasElements print         // expected: true
 
-let emptyList:list              
-[] emptyList!                   // create an empty list
+let emptyList:list = []         // create an empty list
 emptyList@ hasElements print    // check if it has elements
 emptyList@ 4 append             // append element
 emptyList@ print
 
-let aList:list                  
-[1 2 3 4 3] aList! 
+let aList:list = [1 2 3 4 3]
 aList@ 2 "hello" set            // trying setting
 aList@ print                    // [1 2 hello 4 3]
 
 func printEach =
     // we will iterate over this list
-    let localList:list
-    [1 2 3 4 5 "hello" 1.23] localList!
+    let localList:list = [1 2 3 4 5 "hello" 1.23]
 
     // current index
-    let i:int
-    0 i!
+    let i:int = 0
 
     // size of the list
     let len:int
@@ -67,14 +62,9 @@ func printEach =
     end
 end
 
-func printEachWithProvidedList list -> =
-    // capture the first param which is the collection/list
-    let localList:list
-    localList!
-
+func printEachWithProvidedList localList:list -> =
     // current index
-    let i:int
-    0 i!
+    let i:int = 0
 
     // size of the list
     let len:int

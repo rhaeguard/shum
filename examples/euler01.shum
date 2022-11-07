@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////
 /// PURE STACK BASED SOLUTION
 ////////////////////////////////////////////////////
-0 // sum 
+0 // sum
 3 // starting from
 loop dup 1000 < do
     dup                             // [sum, num, num]
@@ -15,25 +15,23 @@ loop dup 1000 < do
     3 % 0 ==                        // [sum, num, true/false, true/false]
     or if                           // [sum, num, true/false]
         dup                         // [sum, num, num]
-    else                    
+    else
         0                           // [sum, num, num]
-    end     
+    end
     dup2over1 drop drop             // [num, num, sum]
     +                               // [num, num + sum]
     swap                            // [sum + num, num]
     1 +                             // [sum + num, num + 1]
-end 
+end
 drop    // drop the number which is 1000
 print   // print the sum
 
 ////////////////////////////////////////////////////
 /// USING VARIABLES
 ////////////////////////////////////////////////////
-let start:int
-3 start!
+let start:int = 3
 
-let sum:int
-0 sum!
+let sum:int = 0
 
 loop start@ 1000 < do
     start@ 5 % 0 ==
@@ -52,7 +50,7 @@ sum@ print
 
 func sumTill int -> int = dup 1 + * 2 / end
 
-macro euler = 
+macro euler =
     333 sumTill 3 *
     199 sumTill 5 *
     +

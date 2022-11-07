@@ -1,0 +1,29 @@
+"hello"             upper       print
+"HellO"             lower       print
+"  hello   "        trim        print
+"hello" "hell"      startsWith  print
+"hello" "llo"       endsWith    print
+"hello" "hell"      contains    print
+"   "               isEmpty     print
+"   "               isBlank     print
+"hello world"       len         print
+"hello world"       0 7 substr  print
+"hello" "world"     ++          print
+"HELLO"             isUpper     print
+"hello"             isLower     print
+
+// custom capitalization function
+// written by using built-in string functions
+func toCapitalCase string -> string =
+    dup
+    0 1 substr
+    upper
+    swap
+    dup
+    len 1 swap substr
+    lower
+    ++
+    return
+end
+
+"cOnsTanTinoplE" toCapitalCase print
